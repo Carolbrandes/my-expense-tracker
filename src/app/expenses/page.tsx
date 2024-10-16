@@ -1,5 +1,7 @@
 'use client';
 
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditIcon from '@mui/icons-material/Edit';
 import {
     Alert,
     Box,
@@ -49,6 +51,9 @@ const ExpensePage = () => {
     const [openCategoryModal, setOpenCategoryModal] = useState(false); // Modal para adicionar categoria
     const [newCategory, setNewCategory] = useState(''); // Para o input da nova categoria
     const [categoryError, setCategoryError] = useState<string | null>(null); // Para erros de categoria duplicada
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -68,6 +73,23 @@ const ExpensePage = () => {
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        if (editingId) {
+            const expenseToEdit = expenses.find(exp => exp.id === editingId);
+            if (expenseToEdit) {
+                setDescription(expenseToEdit.description);
+                setCategory(expenseToEdit.category);
+                setAmount(expenseToEdit.amount.toString());
+
+                // Ajustar o formato da data para YYYY-MM-DD
+                const formattedDate = new Date(expenseToEdit.date).toISOString().split('T')[0];
+                setDate(formattedDate);
+
+                setType(expenseToEdit.type);
+            }
+        }
+    }, [editingId, expenses]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -130,6 +152,45 @@ const ExpensePage = () => {
             }
         } catch (error) {
             console.error('Erro ao salvar a categoria:', error);
+        }
+    };
+
+
+    const handleEditSubmit = async (id: string) => {
+        const updatedExpense = { id, description, category, amount: parseFloat(amount), date, type };
+
+        try {
+            const res = await fetch(`/api/expenses/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedExpense),
+            });
+
+            if (res.ok) {
+                const updatedList = expenses.map((exp) => (exp.id === id ? updatedExpense : exp));
+                setExpenses(updatedList);
+                setEditingId(null);
+            }
+
+        } catch (error) {
+            console.log("🚀 ~ handleEditSubmit ~ error:", error)
+
+        }
+    };
+
+    const handleDelete = async () => {
+        if (deleteTarget) {
+            const res = await fetch(`/api/expenses/${deleteTarget.id}`, {
+                method: 'DELETE',
+            });
+
+            if (res.ok) {
+                setExpenses(expenses.filter((exp) => exp.id !== deleteTarget.id));
+                setDeleteTarget(null);
+                setDeleteDialogOpen(false);
+            }
         }
     };
 
@@ -278,34 +339,136 @@ const ExpensePage = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Descrição</TableCell>
-                                <TableCell>Categoria</TableCell>
-                                <TableCell>Valor</TableCell>
-                                <TableCell>Data</TableCell>
-                                <TableCell>Tipo</TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Descrição
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Categoria
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Valor
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>Data
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Tipo
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>Editar
+                                </TableCell>
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Remover
+                                </TableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {expenses.map((expense) => (
                                 <TableRow key={expense.id}>
-                                    <TableCell>{expense.description}</TableCell>
-                                    <TableCell>{expense.category}</TableCell>
+                                    <TableCell>
+                                        {editingId === expense.id ? (
+                                            <TextField
+                                                value={description}
+                                                onChange={(e) => setDescription(e.target.value)}
+                                                fullWidth
+                                                size="small"
+                                            />
+                                        ) : (
+                                            expense.description
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        {editingId === expense.id ? (
+                                            <FormControl fullWidth>
+                                                <Select
+                                                    value={category}
+                                                    onChange={(e) => setCategory(e.target.value)}
+                                                    fullWidth
+                                                    size="small"
+                                                >
+                                                    {categories.map((cat) => (
+                                                        <MenuItem key={cat} value={cat}>
+                                                            {cat}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        ) : (
+                                            expense.category
+                                        )}
+                                    </TableCell>
                                     <TableCell style={{
                                         color: expense.type === TransactionType.Expense ? 'red' : 'green',
                                     }}>
-                                        {expense.type === TransactionType.Expense ? '-' : '+'}
-                                        Gs. {Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                        {editingId === expense.id ? (
+                                            <TextField
+                                                type="number"
+                                                value={amount}
+                                                onChange={(e) => setAmount(e.target.value)}
+                                                fullWidth
+                                                size="small"
+                                            />
+                                        ) : (
+                                            <>
+                                                {expense.type === TransactionType.Expense ? '-' : '+'}
+                                                Gs. {Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                            </>
+                                        )
+                                        }
                                     </TableCell>
                                     <TableCell>
-                                        {new Date(expense.date).toLocaleDateString('pt-BR')}
+                                        {editingId === expense.id ? (
+                                            <TextField
+                                                type="date"
+                                                value={date}
+                                                onChange={(e) => setDate(e.target.value)}
+                                                fullWidth
+                                                size="small"
+                                            />
+                                        ) : (
+                                            new Date(expense.date).toLocaleDateString('pt-BR')
+                                        )}
                                     </TableCell>
-                                    <TableCell>{expense.type === TransactionType.Expense ? "Saídas" : "Entradas"}</TableCell>
+                                    <TableCell>
+                                        {expense.type === TransactionType.Expense ? "Saídas" : "Entradas"}
+                                    </TableCell>
+
+                                    <TableCell>
+                                        {editingId === expense.id ? (
+                                            <Button onClick={() => handleEditSubmit(expense.id)} color="primary">
+                                                Salvar
+                                            </Button>
+                                        ) : (
+                                            <Button aria-label="edit" onClick={() => setEditingId(expense.id)} color="primary">
+                                                <EditIcon />
+                                            </Button>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <Button aria-label="delete" color="error" onClick={() => { setDeleteTarget(expense); setDeleteDialogOpen(true); }}>
+                                            <DeleteIcon />
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
             )}
+
+            {/* Modal de confirmação de deleção */}
+            <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+                <DialogTitle>Confirmação</DialogTitle>
+                <DialogContent>
+                    Tem certeza que deseja excluir a despesa: {deleteTarget?.description}?
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDeleteDialogOpen(false)} color="secondary">
+                        Cancelar
+                    </Button>
+                    <Button onClick={handleDelete} color="error">
+                        Deletar
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
