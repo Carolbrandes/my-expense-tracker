@@ -204,7 +204,7 @@ const ExpensePage = () => {
         >
             {/* Botões para abrir as modais */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 2 }}>
-                <Button variant="contained" color="secondary" onClick={() => setOpenCategoryModal(true)} sx={{ marginRight: '20px' }}>
+                <Button variant="contained" color="warning" onClick={() => setOpenCategoryModal(true)} sx={{ marginRight: '20px' }}>
                     Adicionar Categoria
                 </Button>
                 <Button variant="contained" color="primary" onClick={() => setOpenModal(true)} sx={{ marginRight: '20px' }}>
@@ -428,7 +428,27 @@ const ExpensePage = () => {
                                         )}
                                     </TableCell>
                                     <TableCell>
-                                        {expense.type === TransactionType.Expense ? "Saídas" : "Entradas"}
+                                        {editingId === expense.id ? (
+                                            <FormControl fullWidth>
+                                                <Select
+                                                    value={type}
+                                                    onChange={(e) => setType(e.target.value as TransactionType)}
+                                                    fullWidth
+                                                    size="small"
+                                                >
+                                                    {Object.values(TransactionType).map((type) => (
+                                                        <MenuItem key={type} value={type}>
+                                                            {type === TransactionType.Expense ? "Saída" : "Entrada"}
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        ) : (
+                                            <>
+                                                {expense.type === TransactionType.Expense ? "Saída" : "Entrada"}
+                                            </>
+                                        )}
+
                                     </TableCell>
 
                                     <TableCell>
