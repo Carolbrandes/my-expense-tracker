@@ -1,7 +1,10 @@
 'use client';
 
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import PaidIcon from '@mui/icons-material/Paid';
 import {
     Alert,
     Box,
@@ -23,6 +26,8 @@ import {
     TableRow,
     TextField
 } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
 import { useEffect, useState } from 'react';
 
 enum TransactionType {
@@ -30,7 +35,7 @@ enum TransactionType {
     Expense = 'expense',
 }
 
-type Expense = {
+interface Expense {
     id: string;
     description: string;
     category: string;
@@ -38,6 +43,16 @@ type Expense = {
     date: string;
     type: TransactionType;
 };
+
+const GrayButton = styled(Button)({
+    backgroundColor: '#92A0A7', // Cor cinza
+    color: 'white', // Cor do texto
+    '&:hover': {
+        backgroundColor: '#90A4AE', // Cor ao passar o mouse
+    },
+});
+
+
 
 const ExpensePage = () => {
     const [description, setDescription] = useState('');
@@ -54,42 +69,10 @@ const ExpensePage = () => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
+    const [totalIncome, setTotalIncome] = useState(0)
+    const [totalExpense, setTotalExpense] = useState(0)
+    const [balance, setBalance] = useState(0) //saldo
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/expenses');
-                const data: Expense[] = await res.json();
-                console.log("🚀 ~ fetchData ~ data:", data)
-
-                setExpenses(data);
-
-                const uniqueCategories = Array.from(new Set(data.map((item) => item.category)));
-                setCategories(uniqueCategories);
-            } catch (error) {
-                console.error('Erro ao buscar as despesas:', error);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        if (editingId) {
-            const expenseToEdit = expenses.find(exp => exp.id === editingId);
-            if (expenseToEdit) {
-                setDescription(expenseToEdit.description);
-                setCategory(expenseToEdit.category);
-                setAmount(expenseToEdit.amount.toString());
-
-                // Ajustar o formato da data para YYYY-MM-DD
-                const formattedDate = new Date(expenseToEdit.date).toISOString().split('T')[0];
-                setDate(formattedDate);
-
-                setType(expenseToEdit.type);
-            }
-        }
-    }, [editingId, expenses]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -194,6 +177,67 @@ const ExpensePage = () => {
         }
     };
 
+    const calculateTotals = (transactions: Expense[]) => {
+        const totalIncome = transactions
+            .filter(transaction => transaction.type === TransactionType.Income)
+            .reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        const totalExpense = transactions
+            .filter(transaction => transaction.type === TransactionType.Expense)
+            .reduce((acc, transaction) => acc + transaction.amount, 0);
+
+        const balance = totalIncome - totalExpense;
+
+        return { totalIncome, totalExpense, balance };
+    };
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const res = await fetch('/api/expenses');
+                const data: Expense[] = await res.json();
+                console.log("🚀 ~ fetchData ~ data:", data)
+
+                setExpenses(data);
+
+                const uniqueCategories = Array.from(new Set(data.map((item) => item.category)));
+                setCategories(uniqueCategories);
+            } catch (error) {
+                console.error('Erro ao buscar as despesas:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    useEffect(() => {
+        if (editingId) {
+            const expenseToEdit = expenses.find(exp => exp.id === editingId);
+            if (expenseToEdit) {
+                setDescription(expenseToEdit.description);
+                setCategory(expenseToEdit.category);
+                setAmount(expenseToEdit.amount.toString());
+
+                // Ajustar o formato da data para YYYY-MM-DD
+                const formattedDate = new Date(expenseToEdit.date).toISOString().split('T')[0];
+                setDate(formattedDate);
+
+                setType(expenseToEdit.type);
+            }
+        }
+
+        const { totalIncome, totalExpense, balance } = calculateTotals(expenses);
+        setTotalIncome(totalIncome)
+        setTotalExpense(totalExpense)
+        setBalance(balance)
+
+
+    }, [editingId, expenses]);
+
+
+
+
     return (
         <Box
             display="flex"
@@ -204,11 +248,23 @@ const ExpensePage = () => {
         >
             {/* Botões para abrir as modais */}
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 2 }}>
-                <Button variant="contained" color="warning" onClick={() => setOpenCategoryModal(true)} sx={{ marginRight: '20px' }}>
+                <GrayButton variant="contained" onClick={() => setOpenCategoryModal(true)} sx={{ marginRight: '20px' }}>
                     Adicionar Categoria
-                </Button>
-                <Button variant="contained" color="primary" onClick={() => setOpenModal(true)} sx={{ marginRight: '20px' }}>
-                    Adicionar Registro
+                </GrayButton>
+
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                        setDescription('');
+                        setCategory('');
+                        setAmount('');
+                        setDate('');
+                        setType(TransactionType.Income);
+                        setOpenModal(true)
+                    }}
+                    sx={{ marginRight: '20px' }}>
+                    Nova Transação
                 </Button>
             </Box>
 
@@ -322,7 +378,7 @@ const ExpensePage = () => {
             </Dialog>
 
             <Box sx={{ mb: 4 }}>
-                <h2 >Registro de entradas e saídas</h2>
+                <h2 >Relatório de Transações</h2>
             </Box>
             {expenses.length === 0 ? (
                 <Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
@@ -336,6 +392,11 @@ const ExpensePage = () => {
                 </Box>
             ) : (
                 <TableContainer component={Paper}>
+                    <Box sx={{ display: "flex", alignItems: "center", paddingY: '30px' }}>
+                        <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} /> Total Entradas: Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}  |
+                        <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />   Total Saídas: Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })} |
+                        <PaidIcon color='primary' sx={{ marginLeft: '10px', marginRight: '5px' }} />  Saldo: Gs. {Number(balance).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                    </Box>
                     <Table>
                         <TableHead>
                             <TableRow>
