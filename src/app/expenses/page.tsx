@@ -2,9 +2,12 @@
 
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaidIcon from '@mui/icons-material/Paid';
+
 import {
     Alert,
     Box,
@@ -18,6 +21,7 @@ import {
     MenuItem,
     Paper,
     Select,
+    Skeleton,
     Table,
     TableBody,
     TableCell,
@@ -72,6 +76,15 @@ const ExpensePage = () => {
     const [totalIncome, setTotalIncome] = useState(0)
     const [totalExpense, setTotalExpense] = useState(0)
     const [balance, setBalance] = useState(0) //saldo
+    const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]); // Para os filtros
+    const [filterCategory, setFilterCategory] = useState('');
+    const [filterDate, setFilterDate] = useState('');
+    const [filterType, setFilterType] = useState<TransactionType | ''>('');
+    const [filterDescription, setFilterDescription] = useState('');
+    const [loading, setLoading] = useState(true); // Inicialmente está carregando
+    const [sortCriteria, setSortCriteria] = useState<{ column: string; direction: "asc" | "desc" }[]>([
+        { column: 'description', direction: 'asc' }, // Defina a coluna padrão aqui
+    ]);
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -138,7 +151,6 @@ const ExpensePage = () => {
         }
     };
 
-
     const handleEditSubmit = async (id: string) => {
         const updatedExpense = { id, description, category, amount: parseFloat(amount), date, type };
 
@@ -191,6 +203,65 @@ const ExpensePage = () => {
         return { totalIncome, totalExpense, balance };
     };
 
+    // Função para limpar todos os filtros
+    const clearFilters = () => {
+        setFilterCategory('');
+        setFilterDate('');
+        setFilterType("");
+        setFilterDescription('');
+    };
+
+    const handleSort = (column: string) => {
+        setSortCriteria((prev) => {
+            const existing = prev.find((c) => c.column === column);
+
+            // Se já estiver ordenando por essa coluna, apenas muda a direção
+            if (existing) {
+                return prev.map((c) =>
+                    c.column === column ? { ...c, direction: existing.direction === "asc" ? "desc" : "asc" } : c
+                );
+            }
+
+            // Se for uma nova coluna, adiciona ao array de critérios
+            return [...prev, { column, direction: "asc" }];
+        });
+    };
+
+    const sortedExpenses = filteredExpenses.sort((a, b) => {
+        for (const criteria of sortCriteria) {
+            const { column, direction } = criteria;
+            let comparison = 0;
+
+            if (column === 'description') {
+                comparison = a.description.localeCompare(b.description);
+            } else if (column === 'category') {
+                comparison = a.category.localeCompare(b.category);
+            } else if (column === 'amount') {
+                comparison = a.amount - b.amount;
+            } else if (column === 'date') {
+                comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+            }
+
+            // Se a comparação não for zero, retorna o valor da ordenação
+            if (comparison !== 0) {
+                return direction === "asc" ? comparison : -comparison;
+            }
+        }
+
+        // Se todas as colunas foram iguais, mantém a ordem original
+        return 0;
+    });
+
+    const getArrow = (column: string) => {
+        const criteria = sortCriteria.find((c) => c.column === column);
+        if (!criteria) return null;
+
+        return criteria.direction === "asc" ? (
+            <ArrowUpwardIcon sx={{ color: 'white' }} />
+        ) : (
+            <ArrowDownwardIcon sx={{ color: 'white' }} />
+        );
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -205,11 +276,27 @@ const ExpensePage = () => {
                 setCategories(uniqueCategories);
             } catch (error) {
                 console.error('Erro ao buscar as despesas:', error);
+            } finally {
+                setLoading(false)
             }
         };
 
         fetchData();
     }, []);
+
+    useEffect(() => {
+        // Filtragem
+        const filtered = expenses.filter((expense) => {
+            const matchesCategory = filterCategory ? expense.category === filterCategory : true;
+            const matchesType = filterType ? expense.type === filterType : true;
+            const matchesDescription = filterDescription ? expense.description.toLowerCase().includes(filterDescription.toLowerCase()) : true;
+            const matchesDate = filterDate ? new Date(expense.date).toISOString().split('T')[0] === filterDate : true;
+
+            return matchesCategory && matchesType && matchesDescription && matchesDate;
+        });
+
+        setFilteredExpenses(filtered);
+    }, [filterCategory, filterType, filterDescription, filterDate, expenses]);
 
     useEffect(() => {
         if (editingId) {
@@ -227,16 +314,12 @@ const ExpensePage = () => {
             }
         }
 
-        const { totalIncome, totalExpense, balance } = calculateTotals(expenses);
+        const { totalIncome, totalExpense, balance } = calculateTotals(filteredExpenses);
         setTotalIncome(totalIncome)
         setTotalExpense(totalExpense)
         setBalance(balance)
 
-
-    }, [editingId, expenses]);
-
-
-
+    }, [editingId, expenses, filteredExpenses]);
 
     return (
         <Box
@@ -380,8 +463,129 @@ const ExpensePage = () => {
             <Box sx={{ mb: 4 }}>
                 <h2 >Relatório de Transações</h2>
             </Box>
-            {expenses.length === 0 ? (
-                <Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+
+            <Box sx={{ width: '80%', display: 'flex', gap: 2, paddingY: '30px' }}>
+                {/* Filtro por Descrição */}
+                <TextField
+                    label="Descrição"
+                    value={filterDescription}
+                    onChange={(e) => setFilterDescription(e.target.value)}
+                    fullWidth
+                    size="small"
+                />
+
+                {/* Filtro por Categoria */}
+                <FormControl fullWidth size="small">
+                    <InputLabel>Categoria</InputLabel>
+                    <Select
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                    >
+                        <MenuItem value="">Todas</MenuItem>
+                        {categories.map((cat) => (
+                            <MenuItem key={cat} value={cat}>
+                                {cat}
+                            </MenuItem>
+                        ))}
+                    </Select>
+                </FormControl>
+
+                {/* Filtro por Data */}
+                <TextField
+                    label="Data"
+                    type="date"
+                    value={filterDate}
+                    onChange={(e) => setFilterDate(e.target.value)}
+                    fullWidth
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    size="small"
+                />
+
+                {/* Filtro por Tipo */}
+                <FormControl fullWidth size="small">
+                    <InputLabel>Tipo</InputLabel>
+                    <Select
+                        value={filterType}
+                        onChange={(e) => setFilterType(e.target.value as TransactionType)}
+                    >
+                        <MenuItem value="">Todos</MenuItem>
+                        <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
+                        <MenuItem value={TransactionType.Expense}>Saída</MenuItem>
+                    </Select>
+                </FormControl>
+
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    onClick={clearFilters}
+                    sx={{ minWidth: '160px' }}
+                >
+                    Limpar Filtros
+                </Button>
+            </Box>
+
+            {
+                loading ? (
+                    <TableContainer component={Paper}>
+                        <Table>
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="80%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="60%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="40%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="70%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="50%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="30%" />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Skeleton variant="text" width="30%" />
+                                    </TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                {/* Esqueleto de linhas de tabela */}
+                                {[...Array(5)].map((_, index) => (
+                                    <TableRow key={index}>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="80%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="60%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="40%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="70%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="50%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="30%" />
+                                        </TableCell>
+                                        <TableCell>
+                                            <Skeleton variant="text" width="30%" />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                ) : (filteredExpenses.length === 0 ? (<Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                     <Alert
                         icon={false}
                         severity="warning"
@@ -389,9 +593,7 @@ const ExpensePage = () => {
                     >
                         Nenhum registro encontrado.
                     </Alert>
-                </Box>
-            ) : (
-                <TableContainer component={Paper}>
+                </Box>) : (<TableContainer component={Paper}>
                     <Box sx={{ display: "flex", alignItems: "center", paddingY: '30px' }}>
                         <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} /> Total Entradas: Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}  |
                         <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />   Total Saídas: Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })} |
@@ -400,21 +602,35 @@ const ExpensePage = () => {
                     <Table>
                         <TableHead>
                             <TableRow>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Descrição
+                                <TableCell
+                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                    onClick={() => handleSort('description')}
+                                >
+                                    Descrição {getArrow('description')}
                                 </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Categoria
+                                <TableCell
+                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                    onClick={() => handleSort('category')}
+                                >
+                                    Categoria {getArrow('category')}
                                 </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Valor
+                                <TableCell
+                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                    onClick={() => handleSort('amount')}
+                                >
+                                    Valor {getArrow('amount')}
                                 </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>Data
+                                <TableCell
+                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                    onClick={() => handleSort('date')}
+                                >
+                                    Data {getArrow('date')}
                                 </TableCell>
                                 <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
                                     Tipo
                                 </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>Editar
+                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                    Editar
                                 </TableCell>
                                 <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
                                     Remover
@@ -422,7 +638,7 @@ const ExpensePage = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {expenses.map((expense) => (
+                            {sortedExpenses.map((expense) => (
                                 <TableRow key={expense.id}>
                                     <TableCell>
                                         {editingId === expense.id ? (
@@ -532,8 +748,11 @@ const ExpensePage = () => {
                             ))}
                         </TableBody>
                     </Table>
-                </TableContainer>
-            )}
+                </TableContainer>))
+            }
+
+
+
 
             {/* Modal de confirmação de deleção */}
             <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
