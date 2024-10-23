@@ -369,7 +369,7 @@ const ExpensePage = () => {
                     <Box mt={2}>
                         <h4>Categorias Existentes</h4>
                         {categories.length > 0 ? (
-                            <ul>
+                            <ul style={{ marginLeft: "18px", marginTop: "10px" }}>
                                 {categories.map((cat, index) => (
                                     <li key={index}>{cat}</li>
                                 ))}
