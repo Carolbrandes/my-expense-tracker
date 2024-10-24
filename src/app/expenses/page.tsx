@@ -94,12 +94,12 @@ const ExpensePage = () => {
             id: Date.now().toString(),
             description,
             category,
-            // Remove separadores de milhar e converte para número
-            amount: parseFloat(amount.replace(/\./g, '')), // remove os pontos
+            // Remove thousand separators and convert to number
+            amount: parseFloat(amount.replace(/\./g, '')),
             date,
             type,
         };
-        console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense)
+        console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense);
 
         const res = await fetch('/api/expenses', {
             method: 'POST',
@@ -111,7 +111,11 @@ const ExpensePage = () => {
 
         if (res.ok) {
             const savedExpense = await res.json();
-            setExpenses([...expenses, savedExpense]);
+
+            // Use functional form of setExpenses to ensure the state is up-to-date
+            setExpenses((prevExpenses) => [...prevExpenses, savedExpense]);
+
+            // Clear input fields and close the modal
             setDescription('');
             setCategory('');
             setAmount('');
