@@ -31,8 +31,9 @@ import {
     TextField
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
-
 import { useEffect, useState } from 'react';
+
+
 
 enum TransactionType {
     Income = 'income',
@@ -78,7 +79,7 @@ const ExpensePage = () => {
     const [balance, setBalance] = useState(0) //saldo
     const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]); // Para os filtros
     const [filterCategory, setFilterCategory] = useState('');
-    const [filterDate, setFilterDate] = useState('');
+    const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
     const [filterType, setFilterType] = useState<TransactionType | ''>('');
     const [filterDescription, setFilterDescription] = useState('');
     const [loading, setLoading] = useState(true); // Inicialmente está carregando
@@ -98,6 +99,7 @@ const ExpensePage = () => {
             date,
             type,
         };
+        console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense)
 
         const res = await fetch('/api/expenses', {
             method: 'POST',
@@ -263,6 +265,18 @@ const ExpensePage = () => {
         );
     };
 
+    const formatDateFromISO = (isoString) => {
+        const regex = /^(\d{4})-(\d{2})-(\d{2})/; // Regex to capture year, month, day
+        const match = isoString.match(regex);
+
+        if (match) {
+            const [_, year, month, day] = match; // Destructure the match to get day, month, year
+            return `${day}/${month}/${year}`; // Return in dd/MM/yyyy format
+        }
+
+        return isoString; // Fallback if the string doesn't match
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -290,7 +304,11 @@ const ExpensePage = () => {
             const matchesCategory = filterCategory ? expense.category === filterCategory : true;
             const matchesType = filterType ? expense.type === filterType : true;
             const matchesDescription = filterDescription ? expense.description.toLowerCase().includes(filterDescription.toLowerCase()) : true;
-            const matchesDate = filterDate ? new Date(expense.date).toISOString().split('T')[0] === filterDate : true;
+
+            // Matches date only if both start and end dates are filled
+            const matchesDate = filterDate.startDate && filterDate.endDate
+                ? new Date(expense.date) >= new Date(filterDate.startDate) && new Date(expense.date) <= new Date(filterDate.endDate)
+                : true;
 
             return matchesCategory && matchesType && matchesDescription && matchesDate;
         });
@@ -490,12 +508,25 @@ const ExpensePage = () => {
                     </Select>
                 </FormControl>
 
-                {/* Filtro por Data */}
+                {/* Start Date */}
                 <TextField
-                    label="Data"
+                    label="Start Date"
                     type="date"
-                    value={filterDate}
-                    onChange={(e) => setFilterDate(e.target.value)}
+                    value={filterDate.startDate}
+                    onChange={(e) => setFilterDate((prev) => ({ ...prev, startDate: e.target.value }))}
+                    fullWidth
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    size="small"
+                />
+
+                {/* End Date */}
+                <TextField
+                    label="End Date"
+                    type="date"
+                    value={filterDate.endDate}
+                    onChange={(e) => setFilterDate((prev) => ({ ...prev, endDate: e.target.value }))}
                     fullWidth
                     InputLabelProps={{
                         shrink: true,
@@ -701,7 +732,7 @@ const ExpensePage = () => {
                                                 size="small"
                                             />
                                         ) : (
-                                            new Date(expense.date).toLocaleDateString('pt-BR')
+                                            formatDateFromISO(expense.date) // Use the helper function to format the date
                                         )}
                                     </TableCell>
                                     <TableCell>
