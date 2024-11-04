@@ -7,6 +7,8 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaidIcon from '@mui/icons-material/Paid';
+import CurrencyInput from 'react-currency-input-field';
+
 
 import {
     Alert,
@@ -17,10 +19,13 @@ import {
     DialogContent,
     DialogTitle,
     FormControl,
+    InputAdornment,
+    InputBaseComponentProps,
     InputLabel,
     MenuItem,
     Paper,
     Select,
+    SelectChangeEvent,
     Skeleton,
     Table,
     TableBody,
@@ -28,10 +33,11 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField
+    TextField,
+    useMediaQuery
 } from '@mui/material';
-import { styled } from '@mui/material/styles';
-import { useEffect, useState } from 'react';
+import { styled, useTheme } from '@mui/material/styles';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 
 
 
@@ -56,6 +62,16 @@ const GrayButton = styled(Button)({
         backgroundColor: '#90A4AE', // Cor ao passar o mouse
     },
 });
+
+const OutlineGrayButton = styled(Button)({
+    color: '#92A0A7',
+    background: 'transparent',
+    '&:hover': {
+        color: '#90A4AE', // Cor ao passar o mouse
+    },
+});
+
+
 
 
 
@@ -86,6 +102,15 @@ const ExpensePage = () => {
     const [sortCriteria, setSortCriteria] = useState<{ column: string; direction: "asc" | "desc" }[]>([
         { column: 'description', direction: 'asc' }, // Defina a coluna padrão aqui
     ]);
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const CustomCurrencyInput = React.forwardRef<HTMLInputElement, InputBaseComponentProps>((props, ref) => (
+        <CurrencyInput {...props} ref={ref} />
+    ));
+
+    CustomCurrencyInput.displayName = 'CustomCurrencyInput';
+
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -281,6 +306,12 @@ const ExpensePage = () => {
         return isoString; // Fallback if the string doesn't match
     };
 
+
+
+    const handleType = (event: SelectChangeEvent<"" | TransactionType>) => {
+        setFilterType(event.target.value as "" | TransactionType);
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -352,8 +383,21 @@ const ExpensePage = () => {
             sx={{ padding: '20px', spacing: 2 }}
         >
             {/* Botões para abrir as modais */}
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', width: '100%', mb: 2 }}>
-                <GrayButton variant="contained" onClick={() => setOpenCategoryModal(true)} sx={{ marginRight: '20px' }}>
+            <Box sx={{
+                display: 'flex',
+                flexDirection: isMobile ? 'column' : 'row',
+                justifyContent: isMobile ? 'center' : 'flex-end',
+                width: '100%',
+                mb: isMobile ? 4 : 2
+            }} >
+                <GrayButton
+                    variant="contained"
+                    onClick={() => setOpenCategoryModal(true)}
+                    sx={{
+                        marginRight: '20px',
+                        marginBottom: isMobile ? '10px' : 0,
+                        fontSize: isMobile ? '0.8rem' : '1rem'
+                    }}>
                     Adicionar Categoria
                 </GrayButton>
 
@@ -368,8 +412,12 @@ const ExpensePage = () => {
                         setType(TransactionType.Income);
                         setOpenModal(true)
                     }}
-                    sx={{ marginRight: '20px' }}>
+                    sx={{
+                        marginRight: '20px',
+                        fontSize: isMobile ? '0.8rem' : '1rem'
+                    }}>
                     Nova Transação
+
                 </Button>
             </Box>
 
@@ -402,9 +450,9 @@ const ExpensePage = () => {
                     </Box>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenCategoryModal(false)} color="secondary">
+                    <OutlineGrayButton onClick={() => setOpenCategoryModal(false)} >
                         Cancelar
-                    </Button>
+                    </OutlineGrayButton>
                     <Button onClick={handleCategorySubmit} color="primary">
                         Salvar
                     </Button>
@@ -416,6 +464,19 @@ const ExpensePage = () => {
                 <DialogTitle>Cadastrar Entradas ou Despesas</DialogTitle>
                 <DialogContent>
                     <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '500px' }}>
+                        <TextField
+                            label="Data"
+                            type="date"
+                            value={date}
+                            onChange={(e) => setDate(e.target.value)}
+                            required
+                            fullWidth
+                            margin="normal"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                        />
+
                         <TextField
                             label="Descrição"
                             value={description}
@@ -438,55 +499,64 @@ const ExpensePage = () => {
                                 ))}
                             </Select>
                         </FormControl>
-                        <TextField
-                            label="Valor"
-                            type="number"
-                            value={amount}
-                            onChange={(e) => setAmount(e.target.value)}
-                            required
-                            fullWidth
-                            margin="normal"
-                        />
-                        <TextField
-                            label="Data"
-                            type="date"
-                            value={date}
-                            onChange={(e) => setDate(e.target.value)}
-                            required
-                            fullWidth
-                            margin="normal"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                        />
+
                         <FormControl fullWidth margin="normal">
                             <InputLabel>Tipo</InputLabel>
                             <Select
                                 value={type}
-                                onChange={(e) => setType(e.target.value as TransactionType)}
+                                onChange={handleType}
                                 required
                             >
                                 <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
                                 <MenuItem value={TransactionType.Expense}>Saída</MenuItem>
                             </Select>
                         </FormControl>
+
+                        <FormControl fullWidth margin="normal">
+                            <TextField
+                                fullWidth
+                                label="Amount"
+                                variant="outlined"
+                                InputProps={{
+                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                                    inputComponent: CustomCurrencyInput as React.ElementType<InputBaseComponentProps>, // Step 2: Cast inputComponent type
+                                    inputProps: {
+                                        decimalsLimit: 2,
+                                        defaultValue: amount,
+                                        placeholder: 'Enter amount',
+                                        onValueChange: (value: string | undefined) => setAmount(value),
+                                    },
+                                }}
+                            />
+                        </FormControl>
+
+
+
                     </form>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setOpenModal(false)} color="secondary">
+                    <OutlineGrayButton onClick={() => setOpenModal(false)} color="secondary">
                         Cancelar
-                    </Button>
+                    </OutlineGrayButton>
                     <Button onClick={handleSubmit} color="primary">
                         Salvar
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            <Box sx={{ mb: 4 }}>
+            <Box>
                 <h2 >Relatório de Transações</h2>
             </Box>
 
-            <Box sx={{ width: '80%', display: 'flex', gap: 2, paddingY: '30px' }}>
+            <Box
+                sx={{
+                    width: '80%',
+                    display: 'flex',
+                    flexDirection: isMobile ? 'column' : 'row', // Filtros em coluna no mobile
+                    gap: 2,
+                    paddingY: isMobile ? '15px' : '30px'
+                }}
+            >
                 {/* Filtro por Descrição */}
                 <TextField
                     label="Descrição"
@@ -543,7 +613,7 @@ const ExpensePage = () => {
                     <InputLabel>Tipo</InputLabel>
                     <Select
                         value={filterType}
-                        onChange={(e) => setFilterType(e.target.value as TransactionType)}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => setFilterType(e.target.value as "" | TransactionType)}
                     >
                         <MenuItem value="">Todos</MenuItem>
                         <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
@@ -620,170 +690,231 @@ const ExpensePage = () => {
                             </TableBody>
                         </Table>
                     </TableContainer>
-                ) : (filteredExpenses.length === 0 ? (<Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-                    <Alert
-                        icon={false}
-                        severity="warning"
-                        sx={{ width: '60%', height: 'auto' }}
-                    >
-                        Nenhum registro encontrado.
-                    </Alert>
-                </Box>) : (<TableContainer component={Paper}>
-                    <Box sx={{ display: "flex", alignItems: "center", paddingY: '30px' }}>
-                        <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} /> Total Entradas: Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}  |
-                        <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />   Total Saídas: Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })} |
-                        <PaidIcon color='primary' sx={{ marginLeft: '10px', marginRight: '5px' }} />  Saldo: Gs. {Number(balance).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
-                    </Box>
-                    <Table>
-                        <TableHead>
-                            <TableRow>
-                                <TableCell
-                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
-                                    onClick={() => handleSort('description')}
+                ) : (
+                    filteredExpenses.length === 0 ?
+                        (
+                            <Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                                <Alert
+                                    icon={false}
+                                    severity="warning"
+                                    sx={{ width: isMobile ? '90%' : '60%', height: 'auto' }}
                                 >
-                                    Descrição {getArrow('description')}
-                                </TableCell>
-                                <TableCell
-                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
-                                    onClick={() => handleSort('category')}
-                                >
-                                    Categoria {getArrow('category')}
-                                </TableCell>
-                                <TableCell
-                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
-                                    onClick={() => handleSort('amount')}
-                                >
-                                    Valor {getArrow('amount')}
-                                </TableCell>
-                                <TableCell
-                                    style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
-                                    onClick={() => handleSort('date')}
-                                >
-                                    Data {getArrow('date')}
-                                </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Tipo
-                                </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Editar
-                                </TableCell>
-                                <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
-                                    Remover
-                                </TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {sortedExpenses.map((expense) => (
-                                <TableRow key={expense.id}>
-                                    <TableCell>
-                                        {editingId === expense.id ? (
-                                            <TextField
-                                                value={description}
-                                                onChange={(e) => setDescription(e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        ) : (
-                                            expense.description
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {editingId === expense.id ? (
-                                            <FormControl fullWidth>
-                                                <Select
-                                                    value={category}
-                                                    onChange={(e) => setCategory(e.target.value)}
-                                                    fullWidth
-                                                    size="small"
-                                                >
-                                                    {categories.map((cat) => (
-                                                        <MenuItem key={cat} value={cat}>
-                                                            {cat}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        ) : (
-                                            expense.category
-                                        )}
-                                    </TableCell>
-                                    <TableCell style={{
-                                        color: expense.type === TransactionType.Expense ? 'red' : 'green',
-                                    }}>
-                                        {editingId === expense.id ? (
-                                            <TextField
-                                                type="number"
-                                                value={amount}
-                                                onChange={(e) => setAmount(e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        ) : (
-                                            <>
-                                                {expense.type === TransactionType.Expense ? '-' : '+'}
-                                                Gs. {Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
-                                            </>
-                                        )
-                                        }
-                                    </TableCell>
-                                    <TableCell>
-                                        {editingId === expense.id ? (
-                                            <TextField
-                                                type="date"
-                                                value={date}
-                                                onChange={(e) => setDate(e.target.value)}
-                                                fullWidth
-                                                size="small"
-                                            />
-                                        ) : (
-                                            formatDateFromISO(expense.date) // Use the helper function to format the date
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        {editingId === expense.id ? (
-                                            <FormControl fullWidth>
-                                                <Select
-                                                    value={type}
-                                                    onChange={(e) => setType(e.target.value as TransactionType)}
-                                                    fullWidth
-                                                    size="small"
-                                                >
-                                                    {Object.values(TransactionType).map((type) => (
-                                                        <MenuItem key={type} value={type}>
-                                                            {type === TransactionType.Expense ? "Saída" : "Entrada"}
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        ) : (
-                                            <>
-                                                {expense.type === TransactionType.Expense ? "Saída" : "Entrada"}
-                                            </>
-                                        )}
+                                    Nenhum registro encontrado.
+                                </Alert>
+                            </Box>
+                        ) :
+                        (
 
-                                    </TableCell>
+                            <TableContainer component={Paper}>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        justifyContent: isMobile ? 'center' : 'flex-start',
+                                        alignItems: "center",
+                                        paddingY: '30px',
+                                        fontSize: isMobile ? '0.75rem' : '1rem'  // 12px para mobile, 16px para desktop
+                                    }}
+                                >
+                                    <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                                    {!isMobile && "Total Entradas:"} Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                    {!isMobile && "|"}
+                                    <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                                    {!isMobile && "Total Saídas:"} Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                    {!isMobile && "|"}
+                                    <PaidIcon color='primary' sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                                    {!isMobile && "Saldo:"} Gs. {Number(balance).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                </Box>
 
-                                    <TableCell>
-                                        {editingId === expense.id ? (
-                                            <Button onClick={() => handleEditSubmit(expense.id)} color="primary">
-                                                Salvar
-                                            </Button>
-                                        ) : (
-                                            <Button aria-label="edit" onClick={() => setEditingId(expense.id)} color="primary">
-                                                <EditIcon />
-                                            </Button>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <Button aria-label="delete" color="error" onClick={() => { setDeleteTarget(expense); setDeleteDialogOpen(true); }}>
-                                            <DeleteIcon />
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>))
+                                {
+                                    isMobile ?
+                                        (// Mobile view with card style
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                                {sortedExpenses.map((expense) => (
+                                                    <Paper key={expense.id} style={{ padding: '1rem', position: 'relative', border: '1px solid #ddd' }}>
+                                                        <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.25rem' }}>
+                                                            <Button sx={{ minWidth: '5px' }} aria-label="edit" onClick={() => setEditingId(expense.id)} color="primary">
+                                                                <EditIcon />
+                                                            </Button>
+                                                            <Button sx={{ minWidth: '5px' }} aria-label="delete" color="error" onClick={() => { setDeleteTarget(expense); setDeleteDialogOpen(true); }}>
+                                                                <DeleteIcon />
+                                                            </Button>
+                                                        </div>
+                                                        <div>
+                                                            <div style={{
+                                                                clear: 'both',
+                                                                whiteSpace: "nowrap",
+                                                                overflow: "hidden",
+                                                                textOverflow: "ellipsis",
+                                                                width: '200px'
+                                                            }}><strong>Descrição:</strong> {expense.description}</div>
+                                                            <div><strong>Categoria:</strong> {expense.category}</div>
+                                                            <div style={{ color: expense.type === TransactionType.Expense ? 'red' : 'green' }}>
+                                                                <strong>Valor:</strong> {expense.type === TransactionType.Expense ? '-' : '+'} Gs. {Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                                                            </div>
+                                                            <div><strong>Data:</strong> {formatDateFromISO(expense.date)}</div>
+                                                            <div><strong>Tipo:</strong> {expense.type === TransactionType.Expense ? "Saída" : "Entrada"}</div>
+                                                        </div>
+                                                    </Paper>
+                                                ))}
+                                            </div>
+                                        ) :
+                                        (<Table>
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell
+                                                        style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                                        onClick={() => handleSort('description')}
+                                                    >
+                                                        Descrição {getArrow('description')}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                                        onClick={() => handleSort('category')}
+                                                    >
+                                                        Categoria {getArrow('category')}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                                        onClick={() => handleSort('amount')}
+                                                    >
+                                                        Valor {getArrow('amount')}
+                                                    </TableCell>
+                                                    <TableCell
+                                                        style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700', cursor: 'pointer' }}
+                                                        onClick={() => handleSort('date')}
+                                                    >
+                                                        Data {getArrow('date')}
+                                                    </TableCell>
+                                                    <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                                        Tipo
+                                                    </TableCell>
+                                                    <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                                        Editar
+                                                    </TableCell>
+                                                    <TableCell style={{ backgroundColor: '#2196f3', color: 'white', fontWeight: '700' }}>
+                                                        Remover
+                                                    </TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                {sortedExpenses.map((expense) => (
+                                                    <TableRow key={expense.id}>
+                                                        <TableCell>
+                                                            {editingId === expense.id ? (
+                                                                <TextField
+                                                                    value={description}
+                                                                    onChange={(e) => setDescription(e.target.value)}
+                                                                    fullWidth
+                                                                    size="small"
+                                                                />
+                                                            ) : (
+                                                                expense.description
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {editingId === expense.id ? (
+                                                                <FormControl fullWidth>
+                                                                    <Select
+                                                                        value={category}
+                                                                        onChange={(e) => setCategory(e.target.value)}
+                                                                        fullWidth
+                                                                        size="small"
+                                                                    >
+                                                                        {categories.map((cat) => (
+                                                                            <MenuItem key={cat} value={cat}>
+                                                                                {cat}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                </FormControl>
+                                                            ) : (
+                                                                expense.category
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell
+                                                            style={{
+                                                                color: expense.type === TransactionType.Expense ? 'red' : 'green',
+                                                            }}
+                                                        >
+                                                            {editingId === expense.id ? (
+                                                                <TextField
+                                                                    type="number"
+                                                                    value={amount}
+                                                                    onChange={(e) => setAmount(e.target.value)}
+                                                                    fullWidth
+                                                                    size="small"
+                                                                />
+                                                            ) : (
+                                                                <>
+                                                                    {expense.type === TransactionType.Expense ? '-' : '+'}
+                                                                    {currency === 'real'
+                                                                        ? `R$ ${Number(expense.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+                                                                        : `Gs. ${Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}`}
+                                                                </>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {editingId === expense.id ? (
+                                                                <TextField
+                                                                    type="date"
+                                                                    value={date}
+                                                                    onChange={(e) => setDate(e.target.value)}
+                                                                    fullWidth
+                                                                    size="small"
+                                                                />
+                                                            ) : (
+                                                                formatDateFromISO(expense.date) // Use the helper function to format the date
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {editingId === expense.id ? (
+                                                                <FormControl fullWidth>
+                                                                    <Select
+                                                                        value={type}
+                                                                        onChange={(e) => setType(e.target.value as TransactionType)}
+                                                                        fullWidth
+                                                                        size="small"
+                                                                    >
+                                                                        {Object.values(TransactionType).map((type) => (
+                                                                            <MenuItem key={type} value={type}>
+                                                                                {type === TransactionType.Expense ? "Saída" : "Entrada"}
+                                                                            </MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                </FormControl>
+                                                            ) : (
+                                                                <>
+                                                                    {expense.type === TransactionType.Expense ? "Saída" : "Entrada"}
+                                                                </>
+                                                            )}
+
+                                                        </TableCell>
+
+                                                        <TableCell>
+                                                            {editingId === expense.id ? (
+                                                                <Button onClick={() => handleEditSubmit(expense.id)} color="primary">
+                                                                    Salvar
+                                                                </Button>
+                                                            ) : (
+                                                                <Button aria-label="edit" onClick={() => setEditingId(expense.id)} color="primary">
+                                                                    <EditIcon />
+                                                                </Button>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Button aria-label="delete" color="error" onClick={() => { setDeleteTarget(expense); setDeleteDialogOpen(true); }}>
+                                                                <DeleteIcon />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>)
+                                }
+
+
+                            </TableContainer>)
+                )
             }
 
 

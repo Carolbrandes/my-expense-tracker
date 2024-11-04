@@ -1,14 +1,11 @@
 import { prisma } from '@/lib/prisma';
+import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Atualiza uma despesa existente
+// Atualiza uma transacao existente
 export async function PUT(request: NextRequest) {
-    // Captura o ID da URL
     const { pathname } = request.nextUrl;
-    const idString = pathname.split('/').pop(); // Pega a última parte da URL
-    console.log("🚀 ~ PUT ~ idString:", idString)
-
-    // Verifica se o id é válido e converte para número
+    const idString = pathname.split('/').pop();
     const id = idString ? parseInt(idString, 10) : null;
 
     if (id === null || isNaN(id)) {
@@ -31,13 +28,13 @@ export async function PUT(request: NextRequest) {
                 category,
                 amount,
                 date: updatedDate,
-                type,
-            },
+                type
+            } as Prisma.ExpenseUpdateInput
         });
 
         return NextResponse.json(updatedExpense);
     } catch (error) {
-        console.error("🚀 ~ PUT ~ error updatedExpense:", error);
+        console.error("Error updating expense:", error);
         return NextResponse.json({ message: 'Erro ao atualizar despesa.' }, { status: 500 });
     }
 }
