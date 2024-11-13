@@ -53,6 +53,11 @@ interface Expense {
     type: TransactionType;
 };
 
+interface Category {
+    id: number,
+    name: string
+}
+
 
 
 const GrayButton = styled(Button)({
@@ -77,8 +82,8 @@ const ExpensePage = () => {
     const [category, setCategory] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
-    const [type, setType] = useState<TransactionType>(TransactionType.Income);
-    const [categories, setCategories] = useState<string[]>([]);
+    const [type, setType] = useState<TransactionType>(TransactionType.Expense);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [openModal, setOpenModal] = useState(false); // Modal para adicionar despesa
     const [openCategoryModal, setOpenCategoryModal] = useState(false); // Modal para adicionar categoria
@@ -127,18 +132,30 @@ const ExpensePage = () => {
         if (res.ok) {
             const savedExpense = await res.json();
 
-            // Use functional form of setExpenses to ensure the state is up-to-date
-            setExpenses((prevExpenses) => [...prevExpenses, savedExpense]);
+            getExpenses()
 
             // Clear input fields and close the modal
             setDescription('');
             setCategory('');
             setAmount('');
             setDate('');
-            setType(TransactionType.Income);
+            setType(TransactionType.Expense);
             setOpenModal(false);
         }
     };
+
+    const getCategories = async () => {
+        try {
+            const resCategories = await fetch("/api/categories")
+            const categories = await resCategories.json()
+            console.log("🚀 ~ fetchData ~ categories:", categories)
+            setCategories(categories);
+
+        } catch (error) {
+            console.log("🚀 ~ getCategories ~ error:", error)
+
+        }
+    }
 
     // Função para salvar a nova categoria com validação de duplicação
     const handleCategorySubmit = async () => {
@@ -147,7 +164,7 @@ const ExpensePage = () => {
         const categoryToSave = newCategory.toLowerCase();
 
         // Valida se a categoria já existe
-        if (categories.includes(categoryToSave)) {
+        if (categories.some(cat => cat.name.includes(categoryToSave))) {
             setCategoryError('Essa categoria já existe.');
             return;
         }
@@ -162,7 +179,7 @@ const ExpensePage = () => {
             });
 
             if (res.ok) {
-                setCategories([...categories, categoryToSave]);
+                getCategories()
                 setNewCategory(''); // Limpa o campo
                 setCategoryError(null); // Remove a mensagem de erro
                 setOpenCategoryModal(false); // Fecha a modal
@@ -300,25 +317,26 @@ const ExpensePage = () => {
         setFilterType(event.target.value as "" | TransactionType);
     };
 
+    const getExpenses = async () => {
+
+        try {
+            const resExpenses = await fetch('/api/expenses');
+            const expensesData: Expense[] = await resExpenses.json();
+            console.log("🚀 ~ fetchExpenses:", expensesData)
+            setExpenses(expensesData);
+
+        } catch (error) {
+            console.error('Erro ao buscar as despesas:', error);
+        } finally {
+            setLoading(false)
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const res = await fetch('/api/expenses');
-                const data: Expense[] = await res.json();
-                console.log("🚀 ~ fetchData ~ data:", data)
 
-                setExpenses(data);
+        getCategories()
 
-                const uniqueCategories = Array.from(new Set(data.map((item) => item.category)));
-                setCategories(uniqueCategories);
-            } catch (error) {
-                console.error('Erro ao buscar as despesas:', error);
-            } finally {
-                setLoading(false)
-            }
-        };
-
-        fetchData();
+        getExpenses();
     }, []);
 
     useEffect(() => {
@@ -397,7 +415,7 @@ const ExpensePage = () => {
                         setCategory('');
                         setAmount('');
                         setDate('');
-                        setType(TransactionType.Income);
+                        setType(TransactionType.Expense);
                         setOpenModal(true)
                     }}
                     sx={{
@@ -428,8 +446,8 @@ const ExpensePage = () => {
                         <h4>Categorias Existentes</h4>
                         {categories.length > 0 ? (
                             <ul style={{ marginLeft: "18px", marginTop: "10px" }}>
-                                {categories.map((cat, index) => (
-                                    <li key={index}>{cat}</li>
+                                {categories.map(({ id, name }) => (
+                                    <li key={id}>{name}</li>
                                 ))}
                             </ul>
                         ) : (
@@ -480,9 +498,9 @@ const ExpensePage = () => {
                                 onChange={(e) => setCategory(e.target.value)}
                                 required
                             >
-                                {categories.map((cat) => (
-                                    <MenuItem key={cat} value={cat}>
-                                        {cat}
+                                {categories.map(({ id, name }) => (
+                                    <MenuItem key={id} value={name}>
+                                        {name}
                                     </MenuItem>
                                 ))}
                             </Select>
@@ -495,8 +513,8 @@ const ExpensePage = () => {
                                 onChange={handleType}
                                 required
                             >
-                                <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
                                 <MenuItem value={TransactionType.Expense}>Saída</MenuItem>
+                                <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
                             </Select>
                         </FormControl>
 
@@ -828,9 +846,7 @@ const ExpensePage = () => {
                                                             ) : (
                                                                 <>
                                                                     {expense.type === TransactionType.Expense ? '-' : '+'}
-                                                                    {currency === 'real'
-                                                                        ? `R$ ${Number(expense.amount).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
-                                                                        : `Gs. ${Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}`}
+                                                                    Gs. ${Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
                                                                 </>
                                                             )}
                                                         </TableCell>
