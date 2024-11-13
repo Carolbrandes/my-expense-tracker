@@ -7,7 +7,7 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import PaidIcon from '@mui/icons-material/Paid';
-import CurrencyInput from 'react-currency-input-field';
+import { CurrencyInput } from '../components/CurrencyInput';
 
 
 import {
@@ -19,8 +19,6 @@ import {
     DialogContent,
     DialogTitle,
     FormControl,
-    InputAdornment,
-    InputBaseComponentProps,
     InputLabel,
     MenuItem,
     Paper,
@@ -55,6 +53,8 @@ interface Expense {
     type: TransactionType;
 };
 
+
+
 const GrayButton = styled(Button)({
     backgroundColor: '#92A0A7', // Cor cinza
     color: 'white', // Cor do texto
@@ -70,9 +70,6 @@ const OutlineGrayButton = styled(Button)({
         color: '#90A4AE', // Cor ao passar o mouse
     },
 });
-
-
-
 
 
 const ExpensePage = () => {
@@ -104,13 +101,6 @@ const ExpensePage = () => {
     ]);
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
-    const CustomCurrencyInput = React.forwardRef<HTMLInputElement, InputBaseComponentProps>((props, ref) => (
-        <CurrencyInput {...props} ref={ref} />
-    ));
-
-    CustomCurrencyInput.displayName = 'CustomCurrencyInput';
-
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -305,8 +295,6 @@ const ExpensePage = () => {
 
         return isoString; // Fallback if the string doesn't match
     };
-
-
 
     const handleType = (event: SelectChangeEvent<"" | TransactionType>) => {
         setFilterType(event.target.value as "" | TransactionType);
@@ -513,21 +501,14 @@ const ExpensePage = () => {
                         </FormControl>
 
                         <FormControl fullWidth margin="normal">
-                            <TextField
-                                fullWidth
-                                label="Amount"
-                                variant="outlined"
-                                InputProps={{
-                                    startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                                    inputComponent: CustomCurrencyInput as React.ElementType<InputBaseComponentProps>, // Step 2: Cast inputComponent type
-                                    inputProps: {
-                                        decimalsLimit: 2,
-                                        defaultValue: amount,
-                                        placeholder: 'Enter amount',
-                                        onValueChange: (value: string | undefined) => setAmount(value),
-                                    },
+                            <CurrencyInput
+                                onChange={(event: { target: { value: string, name: string } }) => {
+                                    setAmount(event.target.value); // Update with the numeric value
                                 }}
+                                name='amount'
+                                value={amount}
                             />
+
                         </FormControl>
 
 
