@@ -1,5 +1,9 @@
 import ExpensePage from './expenses/page';
+import { TransactionProvider } from "./hooks/useTransactions";
 
 export default function Home() {
-  return <ExpensePage />;
+  return < TransactionProvider>
+    <ExpensePage />
+  </TransactionProvider>
+    ;
 }
