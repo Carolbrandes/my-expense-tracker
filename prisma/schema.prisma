@@ -7,6 +7,26 @@ generator client {
   provider = "prisma-client-js" // Gera o cliente Prisma
 }
 
+model User {
+  id          Int              @id @default(autoincrement())
+  email       String           @unique
+  createdAt   DateTime         @default(now())
+  verificationCodes VerificationCode[]
+  expenses    Expense[]
+  categories  Category[]
+}
+
+model VerificationCode {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  code      String
+  createdAt DateTime @default(now())
+  expired   Boolean  @default(false)
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+
 model Expense {
   id          Int      @id @default(autoincrement())
   description String
@@ -14,12 +34,13 @@ model Expense {
   amount      Float
   date        DateTime
   type        String
-  
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
 }
 
-
-
 model Category {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id     Int    @id @default(autoincrement())
+  name   String @unique
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
 }
