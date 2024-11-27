@@ -18,6 +18,7 @@ model User {
 
 model VerificationCode {
   id        Int      @id @default(autoincrement())
+  expiresAt DateTime 
   userId    Int
   code      String
   createdAt DateTime @default(now())

@@ -10,8 +10,7 @@ export default function LoginPage() {
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [code, setCode] = useState("");
     const [message, setMessage] = useState("");
-    console.log("🚀 ~ LoginPage ~ message:", message);
-    const { updateAuthenticated } = useAuth();
+    const { updateAuthenticated, updateUserId } = useAuth();
     const router = useRouter();
 
     const MessagesSeverity = {
@@ -44,15 +43,24 @@ export default function LoginPage() {
         });
 
         const data = await response.json();
+        console.log("🚀 ~ verifyCode ~ data:", data);
+
         if (response.ok) {
             setMessage("Login realizado com sucesso!");
-            localStorage.setItem("auth_token", "your-token"); // Save token
-            updateAuthenticated(true);
+
+            // Assuming the backend sends the token in the response data
+            const token = data.token; // Adjust this based on the actual response from your API
+            localStorage.setItem("auth_token", token); // Save token to localStorage
+
+            updateUserId(data.userId); // Set the user ID if necessary
+            updateAuthenticated(true);  // Set authentication status
+
             router.push("/"); // Redirect to home page
         } else {
             setMessage(data.error || "Código inválido.");
         }
     };
+
 
     const handleBackToEmail = () => {
         setIsCodeSent(false);
@@ -105,7 +113,7 @@ export default function LoginPage() {
                         Solicitar código de verificação
                     </Button>
                     {message && (
-                        <Alert severity={MessagesSeverity[message]}>
+                        <Alert severity={MessagesSeverity[message] || "error"}>
                             {message}
                         </Alert>
                     )}
