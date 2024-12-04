@@ -1,23 +1,44 @@
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
-// Atualiza uma transacao existente
-export async function PUT(request: NextRequest) {
-    const { pathname } = request.nextUrl;
-    const idString = pathname.split('/').pop();
-    const id = idString ? parseInt(idString, 10) : null;
+// Get a specific expense by ID
+export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+    const id = parseInt(params.id, 10);
 
-    if (id === null || isNaN(id)) {
-        return NextResponse.json({ message: 'ID inválido.' }, { status: 400 });
+    if (isNaN(id)) {
+        return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
+    }
+
+    try {
+        const expense = await prisma.expense.findUnique({
+            where: { id },
+        });
+
+        if (!expense) {
+            return NextResponse.json({ message: 'Expense not found.' }, { status: 404 });
+        }
+
+        return NextResponse.json(expense, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching expense:", error);
+        return NextResponse.json({ message: 'Error fetching expense.' }, { status: 500 });
+    }
+}
+
+// Update a specific expense by ID
+export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+    const id = parseInt(params.id, 10);
+
+    if (isNaN(id)) {
+        return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
     }
 
     const body = await request.json();
     const { description, category, amount, date, type } = body;
 
-    const updatedDate = new Date(date);
-    if (isNaN(updatedDate.getTime())) {
-        return NextResponse.json({ message: 'Data inválida. Utilize o formato YYYY-MM-DD.' }, { status: 400 });
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        return NextResponse.json({ message: 'Invalid date. Use the format YYYY-MM-DD.' }, { status: 400 });
     }
 
     try {
@@ -27,38 +48,34 @@ export async function PUT(request: NextRequest) {
                 description,
                 category,
                 amount,
-                date: updatedDate,
-                type
-            } as Prisma.ExpenseUpdateInput
+                date: parsedDate,
+                type,
+            },
         });
 
-        return NextResponse.json(updatedExpense);
+        return NextResponse.json(updatedExpense, { status: 200 });
     } catch (error) {
         console.error("Error updating expense:", error);
-        return NextResponse.json({ message: 'Erro ao atualizar despesa.' }, { status: 500 });
+        return NextResponse.json({ message: 'Error updating expense.' }, { status: 500 });
     }
 }
 
-// Deleta uma despesa
-export async function DELETE(request: NextRequest) {
-    // Captura o ID da URL
-    const { pathname } = request.nextUrl;
-    const idString = pathname.split('/').pop(); // Pega a última parte da URL
+// Delete a specific expense by ID
+export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+    const id = parseInt(params.id, 10);
 
-    // Verifica se o id é válido e converte para número
-    const id = idString ? parseInt(idString, 10) : null;
-
-    if (id === null || isNaN(id)) {
-        return NextResponse.json({ message: 'ID inválido.' }, { status: 400 });
+    if (isNaN(id)) {
+        return NextResponse.json({ message: 'Invalid ID.' }, { status: 400 });
     }
 
     try {
         await prisma.expense.delete({
-            where: { id }, // Usando o id convertido para número
+            where: { id },
         });
-        return NextResponse.json({ message: 'Despesa deletada com sucesso.' });
+
+        return NextResponse.json({ message: 'Expense deleted successfully.' }, { status: 200 });
     } catch (error) {
-        console.error("🚀 ~ DELETE ~ error deleteExpense:", error);
-        return NextResponse.json({ message: 'Erro ao deletar despesa.' }, { status: 500 });
+        console.error("Error deleting expense:", error);
+        return NextResponse.json({ message: 'Error deleting expense.' }, { status: 500 });
     }
 }

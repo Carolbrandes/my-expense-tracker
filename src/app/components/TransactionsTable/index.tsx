@@ -27,7 +27,14 @@ export const TransactionsTable = () => {
 
 
     const handleEditSubmit = async (id: string) => {
-        const updatedExpense = { id, description, category, amount: parseFloat(amount), date, type };
+        const updatedExpense = {
+            id,
+            description,
+            category,
+            amount: parseFloat(amount), // Ensure amount is a float
+            date, // Ensure the date is in the correct format (ISO string)
+            type,
+        };
 
         try {
             const res = await fetch(`/api/expenses/${id}`, {
@@ -38,30 +45,43 @@ export const TransactionsTable = () => {
                 body: JSON.stringify(updatedExpense),
             });
 
-            if (res.ok) {
+            if (res.ok && expenses) {
+                // const updatedExpenses = expenses.map((expense) =>
+                //     expense.id === id ? updatedExpense : expense
+                // );
                 getExpenses()
-                setEditingId(null);
+                setEditingId(null); // Exit editing mode
+            } else {
+                const errorData = await res.json();
+                console.error('Erro ao editar a despesa:', errorData.message);
             }
-
         } catch (error) {
-            console.log("🚀 ~ handleEditSubmit ~ error:", error)
-
+            console.error('Erro ao editar a despesa:', error);
         }
     };
+
 
     const handleDelete = async () => {
         if (deleteTarget) {
-            const res = await fetch(`/api/expenses/${deleteTarget.id}`, {
-                method: 'DELETE',
-            });
+            try {
+                const res = await fetch(`/api/expenses/${deleteTarget.id}`, {
+                    method: 'DELETE',
+                });
 
-            if (res.ok) {
-                getExpenses()
-                setDeleteTarget(null);
-                setDeleteDialogOpen(false);
+                if (res.ok) {
+                    getExpenses()
+                    setDeleteTarget(null); // Clear delete target
+                    setDeleteDialogOpen(false); // Close the dialog
+                } else {
+                    const errorData = await res.json();
+                    console.error('Erro ao deletar a despesa:', errorData.message);
+                }
+            } catch (error) {
+                console.error('Erro ao deletar a despesa:', error);
             }
         }
     };
+
 
     const handleSort = (column: string) => {
         setSortCriteria((prev) => {

@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 
@@ -42,13 +43,19 @@ export async function POST(req: Request) {
 
         if (verification) {
             // Mark the code as used or expired
-            const responseVerificationCodeUpdate = await prisma.verificationCode.update({
+            await prisma.verificationCode.update({
                 where: { id: verification.id },
                 data: { expired: true },
             });
-            console.log("🚀 ~ POST ~ verify-code ~ responseVerificationCodeUpdate:", responseVerificationCodeUpdate);
 
-            return NextResponse.json({ userId: user.id });
+            // Generate a token
+            const token = jwt.sign(
+                { userId: user.id, email: user.email }, // Payload
+                process.env.JWT_SECRET || "your_secret_key", // Secret key
+                { expiresIn: "1h" } // Token expiration
+            );
+
+            return NextResponse.json({ userId: user.id, token });
         }
 
         return NextResponse.json({ error: "Invalid or expired code." }, { status: 401 });

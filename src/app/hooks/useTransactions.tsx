@@ -15,6 +15,7 @@ import { Category, Expense } from '../types/interfaces';
 
 interface TransactionProviderProps {
     readonly children: ReactNode
+    userId: string | number | null
 }
 
 
@@ -42,6 +43,7 @@ const TransactionContext = createContext<TransactionContextProps>(
 
 
 export function TransactionProvider({
+    userId,
     children
 }: TransactionProviderProps) {
     const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -58,20 +60,27 @@ export function TransactionProvider({
     const updateLoading = (isLoading: boolean) => setLoading(isLoading)
 
     const getExpenses = async (): Promise<Expense[] | undefined> => {
-        setLoading(true)
+        setLoading(true);
         try {
-            const resExpenses = await fetch('/api/expenses');
-            const expensesData: Expense[] = await resExpenses.json();
-            console.log("🚀 ~ fetchExpenses:", expensesData)
-            setExpenses(expensesData)
-            return expensesData
+            const resExpenses = await fetch(`/api/expenses?userId=${userId}`);  // Include userId in the query string
+            if (resExpenses.ok) {
+                const expensesData: Expense[] = await resExpenses.json();
+                console.log("🚀 ~ fetchExpenses:", expensesData);
+                setExpenses(expensesData); // Update state with fetched expenses
+                return expensesData;
+            } else {
+                const errorData = await resExpenses.json();
+                console.error('Erro ao buscar as despesas:', errorData.message);
+                return undefined;
+            }
         } catch (error) {
             console.error('Erro ao buscar as despesas:', error);
             return undefined;
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
     };
+
 
     const updateFilteredExpenses = (newValue: Expense[] | []) => setFilteredExpenses(newValue)
 

@@ -24,20 +24,19 @@ export const ModalNewCategory = ({
     const [newCategory, setNewCategory] = useState(''); // Para o input da nova categoria
     const [categoryError, setCategoryError] = useState<string | null>(null); // Para erros de categoria duplicada
     const { userId } = useAuth()
-    const { categories, getCategories } = useTransaction();
+    const { categories, getCategories, } = useTransaction();
 
     useEffect(() => {
         getCategories();
     }, []);
 
-    // Função para salvar a nova categoria com validação de duplicação
     const handleCategorySubmit = async () => {
-        if (!newCategory.trim()) return;
+        if (!newCategory.trim()) return; // Prevent empty input
 
         const categoryToSave = newCategory.toLowerCase();
 
-        // Valida se a categoria já existe
-        if (categories.some((cat) => cat.name.includes(categoryToSave))) {
+        // Validate if the category already exists
+        if (categories.some((cat) => cat.name === categoryToSave)) {
             setCategoryError('Essa categoria já existe.');
             return;
         }
@@ -48,19 +47,24 @@ export const ModalNewCategory = ({
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name: categoryToSave, userId }), // Include userId in the body
+                body: JSON.stringify({ name: categoryToSave, userId }), // Include userId in the payload
             });
 
             if (res.ok) {
-                getCategories();
-                setNewCategory(''); // Limpa o campo
-                setCategoryError(null); // Remove a mensagem de erro
-                setOpenCategoryModal(false); // Fecha a modal
+                getCategories()
+                setNewCategory(''); // Clear input field
+                setCategoryError(null); // Clear any error messages
+                setOpenCategoryModal(false); // Close the modal
+            } else {
+                const errorData = await res.json();
+                setCategoryError(errorData.message || 'Erro ao salvar a categoria.');
             }
         } catch (error) {
             console.error('Erro ao salvar a categoria:', error);
+            setCategoryError('Erro inesperado. Tente novamente.');
         }
     };
+
 
     return (
         <Dialog open={openCategoryModal} onClose={() => setOpenCategoryModal(false)}>

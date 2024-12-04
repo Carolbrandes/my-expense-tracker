@@ -1,8 +1,9 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuthContext";
 import { useTransaction } from "../hooks/useTransactions";
-import { TransactionType } from "../types/interfaces";
+import { Expense, TransactionType } from "../types/interfaces";
 import { CurrencyInput } from "./CurrencyInput";
 
 interface ModalNewTransactionsProps {
@@ -27,42 +28,49 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
     const { getExpenses, categories } = useTransaction()
+    const { userId } = useAuth()
+    console.log("🚀 ~ ModalNewTransaction ~ userId:", userId)
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const newExpense: Expense = {
-            id: Date.now().toString(),
-            description,
-            category,
-            // Remove thousand separators and convert to number
-            amount: parseFloat(amount.replace(/\./g, '')),
-            date,
-            type,
-        };
-        console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense);
 
-        const res = await fetch('/api/expenses', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newExpense),
-        });
+        if (userId) {
+            const newExpense: Expense = {
+                id: Date.now().toString(),
+                description,
+                category,
+                // Remove thousand separators and convert to number
+                amount: parseFloat(amount.replace(/\./g, '')),
+                date,
+                type,
+                userId
+            };
+            console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense);
 
-        if (res.ok) {
-            const savedExpense = await res.json();
-            console.log("🚀 ~ handleSubmit ~ savedExpense:", savedExpense)
+            const res = await fetch('/api/expenses', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newExpense),
+            });
 
-            getExpenses()
+            if (res.ok) {
+                const savedExpense = await res.json();
+                console.log("🚀 ~ handleSubmit ~ savedExpense:", savedExpense)
 
-            // Clear input fields and close the modal
-            setDescription('');
-            setCategory('');
-            setAmount('');
-            setDate('');
-            setType(TransactionType.Expense);
-            setOpenModal(false);
+                getExpenses()
+
+                // Clear input fields and close the modal
+                setDescription('');
+                setCategory('');
+                setAmount('');
+                setDate('');
+                setType(TransactionType.Expense);
+                setOpenModal(false);
+            }
         }
+
     };
 
     const handleType = (event: SelectChangeEvent<TransactionType>) => {
@@ -139,7 +147,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                 </form>
             </DialogContent>
             <DialogActions>
-                <OutlineGrayButton onClick={() => setOpenModal(false)} color="secondary">
+                <OutlineGrayButton onClick={() => setOpenModal(false)} >
                     Cancelar
                 </OutlineGrayButton>
                 <Button onClick={handleSubmit} color="primary">

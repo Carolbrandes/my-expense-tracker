@@ -7,7 +7,7 @@ import { useAuth } from './hooks/useAuthContext';
 import { TransactionProvider } from "./hooks/useTransactions";
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function Home() {
     return null; // Avoid rendering anything while redirecting
   }
 
-  return < TransactionProvider>
+  return < TransactionProvider userId={userId}>
     <ExpensePage />
   </TransactionProvider>
 

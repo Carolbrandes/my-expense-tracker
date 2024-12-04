@@ -42,23 +42,38 @@ export default function LoginPage() {
             body: JSON.stringify({ email, code }),
         });
 
-        const data = await response.json();
-        console.log("🚀 ~ verifyCode ~ data:", data);
+        try {
+            const data = await response.json();
+            console.log("🚀 ~ verifyCode ~ data:", data);
 
-        if (response.ok) {
-            setMessage("Login realizado com sucesso!");
+            if (response.ok) {
+                setMessage("Login realizado com sucesso!");
 
-            // Assuming the backend sends the token in the response data
-            const token = data.token; // Adjust this based on the actual response from your API
-            localStorage.setItem("auth_token", token); // Save token to localStorage
+                // Assuming the backend sends the token in the response data
+                const token = data.token; // here is undefined
+                console.log("🚀 ~ verifyCode ~ token:", token)
 
-            updateUserId(data.userId); // Set the user ID if necessary
-            updateAuthenticated(true);  // Set authentication status
+                if (token) {
+                    localStorage.setItem("auth_token", token); // Save token to localStorage
+                    updateUserId(data.userId); // Set the user ID
+                    updateAuthenticated(true);  // Set authentication status
+                    router.push("/"); // Redirect to home page
+                } else {
+                    console.error("Token is missing in the response.");
+                    setMessage(data.error || "Código inválido.");
+                }
 
-            router.push("/"); // Redirect to home page
-        } else {
-            setMessage(data.error || "Código inválido.");
+                router.push("/"); // Redirect to home page
+            } else {
+                console.log("caiu no else o cod e invalido")
+                setMessage(data.error || "Código inválido.");
+            }
+
+        } catch (error) {
+            console.error("🚀 ~ verifyCode ~ error:", error)
+
         }
+
     };
 
 

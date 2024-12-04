@@ -10,6 +10,7 @@ export interface Expense {
     amount: number;
     date: string;
     type: TransactionType;
+    userId: number | string
 };
 
 export interface Category {

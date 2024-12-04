@@ -7,6 +7,7 @@ import {
 import { styled } from '@mui/material/styles';
 import { useState } from 'react';
 import { Filters } from '../components/Filters';
+import { LogoutButton } from '../components/LogoutButton';
 import { ModalNewCategory } from '../components/ModalNewCategory';
 import { ModalNewTransaction } from '../components/ModalNewTransaction';
 import { Resume } from '../components/Resume';
@@ -42,34 +43,41 @@ const ExpensePage = () => {
             <Box sx={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                justifyContent: isMobile ? 'center' : 'flex-end',
+                justifyContent: isMobile ? 'center' : 'justify-between',
                 width: '100%',
                 mb: isMobile ? 4 : 2
             }} >
-                <GrayButton
-                    variant="contained"
-                    onClick={() => setOpenCategoryModal(true)}
-                    sx={{
-                        marginRight: '20px',
-                        marginBottom: isMobile ? '10px' : 0,
-                        fontSize: isMobile ? '0.8rem' : '1rem'
-                    }}>
-                    Adicionar Categoria
-                </GrayButton>
+                <LogoutButton />
 
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={() => {
-                        setOpenModal(true)
-                    }}
-                    sx={{
-                        marginRight: '20px',
-                        fontSize: isMobile ? '0.8rem' : '1rem'
-                    }}>
-                    Nova Transação
+                <Box sx={{
+                    justifyContent: isMobile ? 'center' : 'flex-end',
+                    width: '100%',
+                }}>
+                    <GrayButton
+                        variant="contained"
+                        onClick={() => setOpenCategoryModal(true)}
+                        sx={{
+                            marginRight: '20px',
+                            marginBottom: isMobile ? '10px' : 0,
+                            fontSize: isMobile ? '0.8rem' : '1rem'
+                        }}>
+                        Adicionar Categoria
+                    </GrayButton>
 
-                </Button>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={() => {
+                            setOpenModal(true)
+                        }}
+                        sx={{
+                            marginRight: '20px',
+                            fontSize: isMobile ? '0.8rem' : '1rem'
+                        }}>
+                        Nova Transação
+
+                    </Button>
+                </Box>
             </Box>
 
             {/* Modal para adicionar nova categoria */}

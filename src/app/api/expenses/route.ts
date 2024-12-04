@@ -1,44 +1,55 @@
 import { prisma } from '@/lib/prisma';
-import { Prisma } from '@prisma/client';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Define the shape of the request body
-interface ExpenseRequestBody {
-    description: string;
-    category: string;
-    amount: number;
-    date: string; // Expecting a date string in YYYY-MM-DD format
-    type: string;
-
-}
-
-// Adiciona nova transação
+// Add a new expense
 export async function POST(request: Request) {
-    const body: ExpenseRequestBody = await request.json();
-    const date = new Date(body.date);
+    const body = await request.json();
+    const { description, category, amount, date, type, userId } = body;
 
-    // Validate the date
-    if (isNaN(date.getTime())) {
-        return NextResponse.json({ message: 'Data inválida. Utilize o formato YYYY-MM-DD.' }, { status: 400 });
+    if (!userId) {
+        return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
     }
 
-    // Create the expense
-    const expense = await prisma.expense.create({
-        data: {
-            description: body.description,
-            category: body.category,
-            amount: body.amount,
-            date: date,
-            type: body.type,
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        return NextResponse.json({ message: 'Invalid date. Use the format YYYY-MM-DD.' }, { status: 400 });
+    }
 
-        } as Prisma.ExpenseCreateInput
-    });
+    try {
+        const expense = await prisma.expense.create({
+            data: {
+                description,
+                category,
+                amount,
+                date: parsedDate,
+                type,
+                userId,
+            },
+        });
 
-    return NextResponse.json(expense);
+        return NextResponse.json(expense, { status: 201 });
+    } catch (error) {
+        console.error("Error creating expense:", error);
+        return NextResponse.json({ message: 'Error creating expense.' }, { status: 500 });
+    }
 }
 
-// Obtém todas as despesas
-export async function GET() {
-    const expenses = await prisma.expense.findMany();
-    return NextResponse.json(expenses);
+// Get all expenses for a user
+export async function GET(request: NextRequest) {
+    const userId = request.nextUrl.searchParams.get('userId');
+
+    if (!userId) {
+        return NextResponse.json({ message: 'User ID is required.' }, { status: 400 });
+    }
+
+    try {
+        const expenses = await prisma.expense.findMany({
+            where: { userId: parseInt(userId, 10) },
+        });
+
+        return NextResponse.json(expenses, { status: 200 });
+    } catch (error) {
+        console.error("Error fetching expenses:", error);
+        return NextResponse.json({ message: 'Error fetching expenses.' }, { status: 500 });
+    }
 }
