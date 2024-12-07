@@ -27,7 +27,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
-    const { getExpenses, categories } = useTransaction()
+    const { categories, addExpense } = useTransaction()
     const { userId } = useAuth()
     console.log("🚀 ~ ModalNewTransaction ~ userId:", userId)
 
@@ -59,7 +59,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                 const savedExpense = await res.json();
                 console.log("🚀 ~ handleSubmit ~ savedExpense:", savedExpense)
 
-                getExpenses()
+                addExpense(savedExpense)
 
                 // Clear input fields and close the modal
                 setDescription('');

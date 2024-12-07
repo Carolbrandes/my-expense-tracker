@@ -24,7 +24,7 @@ export const ModalNewCategory = ({
     const [newCategory, setNewCategory] = useState(''); // Para o input da nova categoria
     const [categoryError, setCategoryError] = useState<string | null>(null); // Para erros de categoria duplicada
     const { userId } = useAuth()
-    const { categories, getCategories, } = useTransaction();
+    const { categories, getCategories, addCategories } = useTransaction();
 
     useEffect(() => {
         getCategories();
@@ -51,7 +51,9 @@ export const ModalNewCategory = ({
             });
 
             if (res.ok) {
-                getCategories()
+                const resPost = await res.json()
+                console.log('post category:', resPost)
+                addCategories(resPost)
                 setNewCategory(''); // Clear input field
                 setCategoryError(null); // Clear any error messages
                 setOpenCategoryModal(false); // Close the modal

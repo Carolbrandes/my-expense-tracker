@@ -22,9 +22,13 @@ interface TransactionProviderProps {
 interface TransactionContextProps {
     categories: Category[]
     getCategories: () => Promise<Category[] | undefined>
+    addCategories: (newCategory: Category) => void
 
     expenses: Expense[] | undefined
     getExpenses: () => Promise<Expense[] | undefined>;
+    addExpense: (newExpense: Expense) => void
+    editExpense: (editExpense: Expense) => void
+    deleteExpense: (idDeleteExpense: number) => void
 
 
     filteredExpenses: Expense[] | []
@@ -60,6 +64,8 @@ export function TransactionProvider({
     const updateLoading = (isLoading: boolean) => setLoading(isLoading)
 
     const getExpenses = async (): Promise<Expense[] | undefined> => {
+        if (!userId) return
+
         setLoading(true);
         try {
             const resExpenses = await fetch(`/api/expenses?userId=${userId}`);  // Include userId in the query string
@@ -81,9 +87,23 @@ export function TransactionProvider({
         }
     };
 
+    const addExpense = (newExpense: Expense) => setExpenses(prevExp => [...prevExp, newExpense])
+
+    const editExpense = (editExpense: Expense) => {
+        console.log("🚀 ~ editExpense ~ :", editExpense)
+        const { id } = editExpense
+        const index = expenses.findIndex(ex => ex.id === id)
+        const expensesClone = [...expenses]
+        expensesClone[index] = editExpense
+        setExpenses(expensesClone)
+
+    }
+
+    const deleteExpense = (idDeleteExpense: number) => {
+        setExpenses(prevExp => prevExp.filter(exp => exp.id !== idDeleteExpense))
+    }
 
     const updateFilteredExpenses = (newValue: Expense[] | []) => setFilteredExpenses(newValue)
-
 
     const getCategories = async () => {
         setLoading(true)
@@ -102,6 +122,8 @@ export function TransactionProvider({
         }
     }
 
+    const addCategories = (newCategory: Category) => setCategories(prevCategories => [...prevCategories, newCategory])
+
     useEffect(() => {
         getExpenses()
     }, [])
@@ -112,6 +134,10 @@ export function TransactionProvider({
         getCategories,
         expenses,
         getExpenses,
+        addExpense,
+        addCategories,
+        editExpense,
+        deleteExpense,
         filteredExpenses,
         updateFilteredExpenses,
         loading,

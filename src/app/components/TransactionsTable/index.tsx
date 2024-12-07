@@ -23,10 +23,10 @@ export const TransactionsTable = () => {
         { column: 'description', direction: 'asc' }, // Defina a coluna padrão aqui
     ]);
 
-    const { isMobile, expenses, getExpenses, categories, filteredExpenses } = useTransaction()
+    const { isMobile, expenses, categories, filteredExpenses, editExpense, deleteExpense } = useTransaction()
 
 
-    const handleEditSubmit = async (id: string) => {
+    const handleEditSubmit = async (id: number) => {
         const updatedExpense = {
             id,
             description,
@@ -46,10 +46,8 @@ export const TransactionsTable = () => {
             });
 
             if (res.ok && expenses) {
-                // const updatedExpenses = expenses.map((expense) =>
-                //     expense.id === id ? updatedExpense : expense
-                // );
-                getExpenses()
+                const resEdit = await res.json()
+                editExpense(resEdit)
                 setEditingId(null); // Exit editing mode
             } else {
                 const errorData = await res.json();
@@ -69,7 +67,7 @@ export const TransactionsTable = () => {
                 });
 
                 if (res.ok) {
-                    getExpenses()
+                    deleteExpense(deleteTarget.id)
                     setDeleteTarget(null); // Clear delete target
                     setDeleteDialogOpen(false); // Close the dialog
                 } else {
