@@ -24,3 +24,4 @@ export interface SortCriteria {
     column: string;
     direction: "asc" | "desc"
 }
+
