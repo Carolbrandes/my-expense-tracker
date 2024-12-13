@@ -1,8 +1,9 @@
 "use client";
 
 import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuthContext";
 
 export default function LoginPage() {
@@ -16,66 +17,85 @@ export default function LoginPage() {
     const MessagesSeverity = {
         "Invalid code.": "error",
         "Código de verificação enviado para o seu email.": "success",
-        "Login realizado com sucesso!": "success"
+        "Login realizado com sucesso!": "success",
+        default: "info",
     };
 
-    const sendCode = async () => {
-        const response = await fetch("/api/send-code", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email }),
-        });
+    // Utility function to validate the token
+    const isTokenValid = (token) => {
+        try {
+            const decoded = jwtDecode(token);
+            return decoded.exp * 1000 > Date.now(); // Token expiration in milliseconds
+        } catch (error) {
+            console.error("Invalid token:", error);
+            return false;
+        }
+    };
 
-        const data = await response.json();
-        if (response.ok) {
-            setIsCodeSent(true);
-            setMessage("Código de verificação enviado para o seu email.");
+    // Check for token validity on page load
+    useEffect(() => {
+        const token = localStorage.getItem("auth_token");
+        if (token && isTokenValid(token)) {
+            updateAuthenticated(true);
+            updateUserId(jwtDecode(token).userId); // Update user ID from token
+            router.push("/"); // Redirect to home if already authenticated
         } else {
-            setMessage(data.error || "Falha ao enviar o código.");
+            localStorage.removeItem("auth_token");
+            updateAuthenticated(false);
+        }
+    }, []);
+
+    const sendCode = async () => {
+        try {
+            const response = await fetch("/api/send-code", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                setIsCodeSent(true);
+                setMessage("Código de verificação enviado para o seu email.");
+            } else {
+                setMessage(data.error || "Falha ao enviar o código.");
+            }
+        } catch (error) {
+            console.error("Error sending code:", error);
+            setMessage("Ocorreu um erro. Tente novamente.");
         }
     };
 
     const verifyCode = async () => {
-        const response = await fetch("/api/verify-code", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, code }),
-        });
-
         try {
+            const response = await fetch("/api/verify-code", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, code }),
+            });
+
             const data = await response.json();
-
-
             if (response.ok) {
-                setMessage("Login realizado com sucesso!");
-
-                // Assuming the backend sends the token in the response data
-                const token = data.token; // here is undefined
-
+                const token = data.token;
 
                 if (token) {
-                    localStorage.setItem("auth_token", token); // Save token to localStorage
-                    updateUserId(data.userId); // Set the user ID
-                    updateAuthenticated(true);  // Set authentication status
-                    router.push("/"); // Redirect to home page
+                    localStorage.setItem("auth_token", token); // Save token
+                    updateUserId(data.userId); // Update user ID
+                    updateAuthenticated(true); // Mark user as authenticated
+                    setMessage("Login realizado com sucesso!");
+                    router.push("/"); // Redirect to home
                 } else {
                     console.error("Token is missing in the response.");
-                    setMessage(data.error || "Código inválido.");
+                    setMessage("Erro no login. Tente novamente.");
                 }
-
-                router.push("/"); // Redirect to home page
             } else {
-
                 setMessage(data.error || "Código inválido.");
             }
-
         } catch (error) {
-            console.error("🚀 ~ verifyCode ~ error:", error)
-
+            console.error("Error verifying code:", error);
+            setMessage("Ocorreu um erro. Tente novamente.");
         }
-
     };
-
 
     const handleBackToEmail = () => {
         setIsCodeSent(false);
@@ -128,7 +148,7 @@ export default function LoginPage() {
                         Solicitar código de verificação
                     </Button>
                     {message && (
-                        <Alert severity={MessagesSeverity[message] || "error"}>
+                        <Alert severity={MessagesSeverity[message] || MessagesSeverity.default}>
                             {message}
                         </Alert>
                     )}
@@ -169,7 +189,7 @@ export default function LoginPage() {
                     </Button>
                     {message && (
                         <>
-                            <Alert severity={MessagesSeverity[message]}>
+                            <Alert severity={MessagesSeverity[message] || MessagesSeverity.default}>
                                 {message}
                             </Alert>
                             {message === "Invalid code." && (

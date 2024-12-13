@@ -52,7 +52,7 @@ export async function POST(req: Request) {
             const token = jwt.sign(
                 { userId: user.id, email: user.email }, // Payload
                 process.env.JWT_SECRET || "your_secret_key", // Secret key
-                { expiresIn: "1h" } // Token expiration
+                { expiresIn: 30 * 24 * 60 * 60 } // Expiration set to 1 month (in seconds)
             );
 
             return NextResponse.json({ userId: user.id, token });

@@ -1,10 +1,15 @@
 import { Button } from "@mui/material";
 import { signOut } from "next-auth/react";
+import { useAuth } from "../../hooks/useAuthContext";
 
 export const LogoutButton = () => {
+    const { updateAuthenticated, updateUserId } = useAuth()
+
     const handleLogout = () => {
-        // Sign out the user and redirect them to the home page or login page
-        signOut({ callbackUrl: "/login" }); // or /home if you want to go to home page
+        localStorage.removeItem("auth_token");
+        updateAuthenticated(false);
+        updateUserId(null);
+        signOut({ callbackUrl: "/login" });
     };
 
     return (
