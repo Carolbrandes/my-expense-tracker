@@ -1,21 +1,22 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import { useTransaction } from '../hooks/useTransactions'
 
-interface ModalDeleteTransactionProps {
-    open: boolean
-    onClose: () => void
-    handleDelete: () => void
-    deleteTarget: Expense
-}
 
-export const ModalDeleteTransaction = ({ open, onClose, handleDelete, deleteTarget }: ModalDeleteTransactionProps) => {
+
+export const ModalDeleteTransaction = () => {
+    const { deleteExpense, deleteTarget, handleCancelModal, deleteDialogOpen } = useTransaction()
+
+    const handleDelete = () => deleteTarget && deleteExpense(deleteTarget)
+
+
     return (
-        <Dialog open={open} onClose={onClose}>
+        <Dialog open={deleteDialogOpen} onClose={() => handleCancelModal(false)}>
             <DialogTitle>Confirmação</DialogTitle>
             <DialogContent>
                 Tem certeza que deseja excluir a despesa: {deleteTarget?.description}?
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
+                <Button onClick={() => handleCancelModal(false)} color="secondary">
                     Cancelar
                 </Button>
                 <Button onClick={handleDelete} color="error">

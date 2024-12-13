@@ -4,7 +4,7 @@ export enum TransactionType {
 }
 
 export interface Expense {
-    id: number;
+    id: number | string;
     description: string;
     category: string;
     amount: number;
@@ -13,7 +13,14 @@ export interface Expense {
     userId: number | string
 };
 
+export type ExpenseDelete = Pick<Expense, 'id' | 'description'>
+
 export interface Category {
     id: number,
     name: string
+}
+
+export interface SortCriteria {
+    column: string;
+    direction: "asc" | "desc"
 }

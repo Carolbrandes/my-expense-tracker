@@ -52,7 +52,7 @@ export const ModalNewCategory = ({
 
             if (res.ok) {
                 const resPost = await res.json()
-                console.log('post category:', resPost)
+
                 addCategories(resPost)
                 setNewCategory(''); // Clear input field
                 setCategoryError(null); // Clear any error messages

@@ -8,11 +8,12 @@ import { styled } from '@mui/material/styles';
 import { useState } from 'react';
 import { Filters } from '../components/Filters';
 import { LogoutButton } from '../components/LogoutButton';
+import { ModalDeleteTransaction } from '../components/ModalDeleteTransaction';
 import { ModalNewCategory } from '../components/ModalNewCategory';
 import { ModalNewTransaction } from '../components/ModalNewTransaction';
 import { Resume } from '../components/Resume';
-import { TransactionsTable } from '../components/TransactionsTable';
-import { SkeletonTable } from '../components/TransactionsTable/SkeletonTable';
+import { Transactions } from '../components/Transactions';
+import { Skeleton } from '../components/Transactions/Skeleton';
 import { useTransaction } from '../hooks/useTransactions';
 
 
@@ -30,6 +31,8 @@ const ExpensePage = () => {
     const [openCategoryModal, setOpenCategoryModal] = useState(false); // Modal para adicionar categoria
 
     const { loading, isMobile } = useTransaction()
+
+
 
     return (
         <Box
@@ -91,22 +94,23 @@ const ExpensePage = () => {
                 <h2 >Relatório de Transações</h2>
             </Box>
 
-
             {/* filtros */}
             <Filters />
 
             {/* Total */}
             <Resume />
 
-
             {
                 loading ? (
-                    <SkeletonTable />
+                    <Skeleton />
 
                 ) : (
-                    <TransactionsTable />
+                    <Transactions />
                 )
             }
+
+            {/* Modal de confirmação de deleção */}
+            <ModalDeleteTransaction />
         </Box>
     );
 };

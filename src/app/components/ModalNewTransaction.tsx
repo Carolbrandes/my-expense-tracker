@@ -29,7 +29,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
 
     const { categories, addExpense } = useTransaction()
     const { userId } = useAuth()
-    console.log("🚀 ~ ModalNewTransaction ~ userId:", userId)
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -45,7 +45,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                 type,
                 userId
             };
-            console.log("🚀 ~ handleSubmit ~ newExpense:", newExpense);
+
 
             const res = await fetch('/api/expenses', {
                 method: 'POST',
@@ -57,7 +57,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
 
             if (res.ok) {
                 const savedExpense = await res.json();
-                console.log("🚀 ~ handleSubmit ~ savedExpense:", savedExpense)
+
 
                 addExpense(savedExpense)
 

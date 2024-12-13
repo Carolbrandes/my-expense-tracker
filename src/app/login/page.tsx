@@ -44,14 +44,14 @@ export default function LoginPage() {
 
         try {
             const data = await response.json();
-            console.log("🚀 ~ verifyCode ~ data:", data);
+
 
             if (response.ok) {
                 setMessage("Login realizado com sucesso!");
 
                 // Assuming the backend sends the token in the response data
                 const token = data.token; // here is undefined
-                console.log("🚀 ~ verifyCode ~ token:", token)
+
 
                 if (token) {
                     localStorage.setItem("auth_token", token); // Save token to localStorage
@@ -65,7 +65,7 @@ export default function LoginPage() {
 
                 router.push("/"); // Redirect to home page
             } else {
-                console.log("caiu no else o cod e invalido")
+
                 setMessage(data.error || "Código inválido.");
             }
 
