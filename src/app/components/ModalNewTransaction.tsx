@@ -2,7 +2,8 @@ import { Button, Dialog, DialogActions, DialogContent, DialogTitle, FormControl,
 import { styled } from '@mui/material/styles';
 import { useState } from "react";
 import { useAuth } from "../hooks/useAuthContext";
-import { useTransaction } from "../hooks/useTransactions";
+import { useCategoriesQuery } from "../hooks/useCategoriesQuery";
+import { useExpensesQuery } from "../hooks/useExpensesQuery";
 import { Expense, TransactionType } from "../types/interfaces";
 import { CurrencyInput } from "./CurrencyInput";
 
@@ -27,8 +28,12 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
-    const { categories, addExpense } = useTransaction()
+    const { createExpense } = useExpensesQuery()
     const { userId } = useAuth()
+    const {
+        categories,
+
+    } = useCategoriesQuery();
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -59,7 +64,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                 const savedExpense = await res.json();
 
 
-                addExpense(savedExpense)
+                createExpense(savedExpense)
 
                 // Clear input fields and close the modal
                 setDescription('');
@@ -76,6 +81,8 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const handleType = (event: SelectChangeEvent<TransactionType>) => {
         setType(event.target.value as TransactionType);
     };
+
+    const safeCategories = Array.isArray(categories) ? categories : [];
 
 
     return (
@@ -111,7 +118,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                             onChange={(e) => setCategory(e.target.value)}
                             required
                         >
-                            {categories && categories.map(({ id, name }) => (
+                            {safeCategories.map(({ id, name }) => (
                                 <MenuItem key={id} value={name}>
                                     {name}
                                 </MenuItem>

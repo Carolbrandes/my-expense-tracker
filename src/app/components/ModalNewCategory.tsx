@@ -1,8 +1,7 @@
-import { Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Alert, Box, Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import { useEffect, useState } from 'react';
-import { useAuth } from '../hooks/useAuthContext';
-import { useTransaction } from '../hooks/useTransactions';
+import { useState } from 'react';
+import { useCategoriesQuery } from '../hooks/useCategoriesQuery';
 
 interface ModalNewCategoryProps {
     openCategoryModal: boolean;
@@ -19,16 +18,21 @@ const OutlineGrayButton = styled(Button)({
 
 export const ModalNewCategory = ({
     openCategoryModal,
-    setOpenCategoryModal
+    setOpenCategoryModal,
 }: ModalNewCategoryProps) => {
-    const [newCategory, setNewCategory] = useState(''); // Para o input da nova categoria
-    const [categoryError, setCategoryError] = useState<string | null>(null); // Para erros de categoria duplicada
-    const { userId } = useAuth()
-    const { categories, getCategories, addCategories } = useTransaction();
+    const [newCategory, setNewCategory] = useState(''); // For new category input
+    const [categoryError, setCategoryError] = useState<string | null>(null); // For duplicate category error
 
-    useEffect(() => {
-        getCategories();
-    }, []);
+    const {
+        categories,
+        isCategoriesLoading,
+        categoriesError,
+        createCategory,
+        isCreating,
+        createError,
+    } = useCategoriesQuery();
+
+    console.log("🚀 ~ categories:", categories)
 
     const handleCategorySubmit = async () => {
         if (!newCategory.trim()) return; // Prevent empty input
@@ -36,37 +40,25 @@ export const ModalNewCategory = ({
         const categoryToSave = newCategory.toLowerCase();
 
         // Validate if the category already exists
-        if (categories.some((cat) => cat.name === categoryToSave)) {
+        if (categories?.some((cat) => cat.name === categoryToSave)) {
             setCategoryError('Essa categoria já existe.');
             return;
         }
 
+        // Proceed with creating the new category via mutation
         try {
-            const res = await fetch('/api/categories', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: categoryToSave, userId }), // Include userId in the payload
-            });
-
-            if (res.ok) {
-                const resPost = await res.json()
-
-                addCategories(resPost)
-                setNewCategory(''); // Clear input field
-                setCategoryError(null); // Clear any error messages
-                setOpenCategoryModal(false); // Close the modal
-            } else {
-                const errorData = await res.json();
-                setCategoryError(errorData.message || 'Erro ao salvar a categoria.');
-            }
+            createCategory(newCategory); // Trigger the mutation
+            setNewCategory(''); // Clear the input field
+            setCategoryError(null); // Clear any error messages
+            setOpenCategoryModal(false); // Close the modal
         } catch (error) {
             console.error('Erro ao salvar a categoria:', error);
             setCategoryError('Erro inesperado. Tente novamente.');
         }
     };
 
+    if (isCategoriesLoading) return <div>Loading categories...</div>;
+    if (categoriesError instanceof Error) return <div>Error: {categoriesError.message}</div>;
 
     return (
         <Dialog open={openCategoryModal} onClose={() => setOpenCategoryModal(false)}>
@@ -79,13 +71,13 @@ export const ModalNewCategory = ({
                     required
                     fullWidth
                     margin="normal"
-                    error={!!categoryError} // Mostra o erro se houver
+                    error={!!categoryError} // Show error if exists
                     helperText={categoryError || ''}
                 />
-                {/* Exibe a lista de categorias existentes */}
+                {/* Display existing categories */}
                 <Box mt={2}>
-                    <h4>Categorias Existentes</h4>
-                    {categories.length > 0 ? (
+                    <h4>Todas as Categorias:</h4>
+                    {categories && categories?.length > 0 ? (
                         <ul style={{ marginLeft: '18px', marginTop: '10px' }}>
                             {categories.map(({ id, name }) => (
                                 <li key={id}>{name}</li>
@@ -95,13 +87,17 @@ export const ModalNewCategory = ({
                         <p>Nenhuma categoria cadastrada.</p>
                     )}
                 </Box>
+
+                {createError && <Alert severity="error" style={{ marginBottom: '16px' }}>
+                    Desculpe, tivemos um problema tente novamente mais tarde.
+                </Alert>}
             </DialogContent>
             <DialogActions>
                 <OutlineGrayButton onClick={() => setOpenCategoryModal(false)}>
                     Cancelar
                 </OutlineGrayButton>
-                <Button onClick={handleCategorySubmit} color="primary">
-                    Salvar
+                <Button onClick={handleCategorySubmit} color="primary" disabled={isCreating}>
+                    {isCreating ? 'Salvando...' : 'Salvar'}
                 </Button>
             </DialogActions>
         </Dialog>

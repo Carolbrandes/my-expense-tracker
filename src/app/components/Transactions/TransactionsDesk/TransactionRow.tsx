@@ -1,3 +1,4 @@
+import { useExpensesQuery } from '@/app/hooks/useExpensesQuery';
 import { useTransaction } from '@/app/hooks/useTransactions';
 import { TransactionType } from '@/app/types/interfaces';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -5,6 +6,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import { Button, FormControl, MenuItem, Select, TableCell, TableRow, TextField } from '@mui/material';
 import { Expense } from '@prisma/client';
 import { useEffect, useState } from 'react';
+import { useCategoriesQuery } from '../../../hooks/useCategoriesQuery';
 
 interface TransactionProps {
     expense: Expense
@@ -18,7 +20,9 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType | "">(TransactionType.Expense);
 
-    const { expenses, editingId, selectExpenseToEdit, formatDateFromISO, categories, defineDeleteTarget, editExpense, handleCancelModal } = useTransaction()
+    const { editingId, selectExpenseToEdit, formatDateFromISO, defineDeleteTarget, handleCancelModal } = useTransaction()
+    const { categories } = useCategoriesQuery();
+    const { expenses, updateExpense } = useExpensesQuery()
 
     const handleEdit = () => {
         const mapTypeToTransactionType = (type: string): TransactionType => {
@@ -37,7 +41,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
 
 
 
-        editExpense(expenseUpdate); // Ensure this updates the correct record
+        updateExpense(expenseUpdate); // Ensure this updates the correct record
 
         selectExpenseToEdit(null); // Exit edit mode
     };
@@ -92,7 +96,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                             fullWidth
                             size="small"
                         >
-                            {categories.map(({ id, name }) => (
+                            {categories && categories.map(({ id, name }) => (
                                 <MenuItem key={id} value={name}>
                                     {name}
                                 </MenuItem>
@@ -175,7 +179,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 )}
             </TableCell>
             <TableCell>
-                <Button aria-label="delete" color="error" onClick={() => handleDel(expense)}>
+                <Button aria-label="delete" color="error" onClick={() => handleDel()}>
                     <DeleteIcon />
                 </Button>
             </TableCell>

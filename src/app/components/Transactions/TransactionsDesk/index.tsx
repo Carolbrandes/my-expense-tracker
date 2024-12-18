@@ -1,5 +1,5 @@
+import { useTransaction } from "@/app/hooks/useTransactions";
 import { Paper, Table, TableBody, TableContainer } from "@mui/material";
-import { useTransaction } from "../../../hooks/useTransactions";
 import { TransactionRow } from './TransactionRow';
 import { TransactionsTableHeader } from './TransactionsTableHeader';
 
@@ -9,9 +9,11 @@ export const TransactionsDesk = () => {
     const { filteredExpenses } = useTransaction()
 
 
+    if (!filteredExpenses) {
+        return
+    }
 
     return (
-
         <TableContainer component={Paper}>
             <Table>
                 <TransactionsTableHeader />

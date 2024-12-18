@@ -1,12 +1,14 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material'
+import { useExpensesQuery } from '../hooks/useExpensesQuery'
 import { useTransaction } from '../hooks/useTransactions'
 
 
 
 export const ModalDeleteTransaction = () => {
-    const { deleteExpense, deleteTarget, handleCancelModal, deleteDialogOpen } = useTransaction()
+    const { deleteTarget, handleCancelModal, deleteDialogOpen } = useTransaction()
+    const { removeExpense } = useExpensesQuery()
 
-    const handleDelete = () => deleteTarget && deleteExpense(deleteTarget)
+    const handleDelete = () => deleteTarget && removeExpense(deleteTarget)
 
 
     return (

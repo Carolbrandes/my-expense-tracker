@@ -1,5 +1,7 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useCategoriesQuery } from "../hooks/useCategoriesQuery";
+import { useExpensesQuery } from "../hooks/useExpensesQuery";
 import { useTransaction } from "../hooks/useTransactions";
 import { TransactionType } from "../types/interfaces";
 
@@ -9,7 +11,24 @@ export const Filters = () => {
     const [filterDescription, setFilterDescription] = useState('');
     const [filterType, setFilterType] = useState<TransactionType | ''>('');
 
-    const { categories, isMobile, expenses, updateFilteredExpenses } = useTransaction()
+    const { isMobile, updateFilteredExpenses } = useTransaction();
+    const { categories } = useCategoriesQuery();
+
+    const filters = useMemo(() => ({
+        description: filterDescription || undefined,
+        category: filterCategory || undefined,
+        type: filterType || undefined,
+        startDate: filterDate.startDate || undefined,
+        endDate: filterDate.endDate || undefined,
+    }), [filterDescription, filterCategory, filterType, filterDate]);
+
+    const { expenses } = useExpensesQuery(filters);
+
+    useEffect(() => {
+        if (expenses) {
+            updateFilteredExpenses(expenses);
+        }
+    }, [expenses, updateFilteredExpenses]);
 
     const clearFilters = () => {
         setFilterCategory('');
@@ -18,34 +37,18 @@ export const Filters = () => {
         setFilterDescription('');
     };
 
-    useEffect(() => {
-        const filtered = expenses?.filter((expense) => {
-            const matchesCategory = filterCategory ? expense.category === filterCategory : true;
-            const matchesType = filterType ? expense.type === filterType : true;
-            const matchesDescription = filterDescription ? expense.description.toLowerCase().includes(filterDescription.toLowerCase()) : true;
-
-            // Matches date only if both start and end dates are filled
-            const matchesDate = filterDate.startDate && filterDate.endDate
-                ? new Date(expense.date) >= new Date(filterDate.startDate) && new Date(expense.date) <= new Date(filterDate.endDate)
-                : true;
-
-            return matchesCategory && matchesType && matchesDescription && matchesDate;
-        }) ?? [];
-
-        updateFilteredExpenses(filtered);
-    }, [filterCategory, filterType, filterDescription, filterDate, expenses]);
+    const safeCategories = Array.isArray(categories) ? categories : [];
 
     return (
         <Box
             sx={{
                 width: '80%',
                 display: 'flex',
-                flexDirection: isMobile ? 'column' : 'row', // Filtros em coluna no mobile
+                flexDirection: isMobile ? 'column' : 'row',
                 gap: 2,
                 paddingY: isMobile ? '15px' : '30px'
             }}
         >
-            {/* Filtro por Descrição */}
             <TextField
                 label="Descrição"
                 value={filterDescription}
@@ -53,8 +56,6 @@ export const Filters = () => {
                 fullWidth
                 size="small"
             />
-
-            {/* Filtro por Categoria */}
             <FormControl fullWidth size="small">
                 <InputLabel>Categoria</InputLabel>
                 <Select
@@ -62,15 +63,13 @@ export const Filters = () => {
                     onChange={(e) => setFilterCategory(e.target.value)}
                 >
                     <MenuItem value="">Todas</MenuItem>
-                    {categories && categories.map(({ id, name }) => (
+                    {safeCategories.map(({ id, name }) => (
                         <MenuItem key={id} value={name}>
                             {name}
                         </MenuItem>
                     ))}
                 </Select>
             </FormControl>
-
-            {/* Start Date */}
             <TextField
                 label="Start Date"
                 type="date"
@@ -82,8 +81,6 @@ export const Filters = () => {
                 }}
                 size="small"
             />
-
-            {/* End Date */}
             <TextField
                 label="End Date"
                 type="date"
@@ -95,8 +92,6 @@ export const Filters = () => {
                 }}
                 size="small"
             />
-
-            {/* Filtro por Tipo */}
             <FormControl fullWidth size="small">
                 <InputLabel>Tipo</InputLabel>
                 <Select
@@ -108,7 +103,6 @@ export const Filters = () => {
                     <MenuItem value={TransactionType.Expense}>Saída</MenuItem>
                 </Select>
             </FormControl>
-
             <Button
                 variant="outlined"
                 color="secondary"
@@ -118,5 +112,5 @@ export const Filters = () => {
                 Limpar Filtros
             </Button>
         </Box>
-    )
-}
+    );
+};

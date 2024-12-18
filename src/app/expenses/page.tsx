@@ -14,6 +14,7 @@ import { ModalNewTransaction } from '../components/ModalNewTransaction';
 import { Resume } from '../components/Resume';
 import { Transactions } from '../components/Transactions';
 import { Skeleton } from '../components/Transactions/Skeleton';
+import { useExpensesQuery } from '../hooks/useExpensesQuery';
 import { useTransaction } from '../hooks/useTransactions';
 
 
@@ -29,8 +30,10 @@ const GrayButton = styled(Button)({
 const ExpensePage = () => {
     const [openModal, setOpenModal] = useState(false); // Modal para adicionar despesa
     const [openCategoryModal, setOpenCategoryModal] = useState(false); // Modal para adicionar categoria
+    console.log("🚀 ~ ExpensePage ~ openCategoryModal:", openCategoryModal)
 
-    const { loading, isMobile } = useTransaction()
+    const { isMobile } = useTransaction()
+    const { isExpensesLoading } = useExpensesQuery()
 
 
 
@@ -101,7 +104,7 @@ const ExpensePage = () => {
             <Resume />
 
             {
-                loading ? (
+                isExpensesLoading ? (
                     <Skeleton />
 
                 ) : (

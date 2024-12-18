@@ -1,3 +1,4 @@
+import { useExpensesQuery } from '@/app/hooks/useExpensesQuery';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import { Button, Paper } from '@mui/material';
@@ -5,7 +6,8 @@ import { useTransaction } from '../../../hooks/useTransactions';
 import { Expense, TransactionType } from '../../../types/interfaces';
 
 export const TransactionsMobile = () => {
-    const { filteredExpenses, handleEditSubmit, handleDelete, formatDateFromISO } = useTransaction()
+    const { formatDateFromISO, filteredExpenses } = useTransaction()
+    const { updateExpense, removeExpense } = useExpensesQuery()
 
     const handleEdit = (expense: Expense) => {
         const newObj = {
@@ -14,7 +16,7 @@ export const TransactionsMobile = () => {
             type: expense.type == "income" ? TransactionType.Income : TransactionType.Expense
         }
 
-        handleEditSubmit(newObj)
+        updateExpense(newObj)
     }
 
     const handleDel = (expense: Expense) => {
@@ -24,7 +26,7 @@ export const TransactionsMobile = () => {
             type: expense.type == "income" ? TransactionType.Income : TransactionType.Expense
         }
 
-        handleDelete(newObj)
+        removeExpense(newObj)
     }
 
 

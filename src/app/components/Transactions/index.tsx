@@ -14,6 +14,7 @@ export const Transactions = () => {
     const { isMobile, filteredExpenses } = useTransaction()
 
 
+
     return (
         <>
             {filteredExpenses?.length === 0 ? (
