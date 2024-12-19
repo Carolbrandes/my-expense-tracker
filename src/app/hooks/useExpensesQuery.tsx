@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Expense, ExpenseDelete } from '../types/interfaces';
+import { Expense, ExpenseDelete, ExpenseResponse } from '../types/interfaces';
 import { useAuth } from './useAuthContext'; // Import the AuthContext hook
 
 interface Filters {
@@ -10,20 +10,23 @@ interface Filters {
     endDate?: string;
     sortBy?: string;
     sortOrder?: string;
+    page?: number;
+    pageSize?: number;
 }
 
 const fetchExpenses = async (
     userId: string,
     filters?: Filters
-): Promise<Expense[]> => {
+): Promise<ExpenseResponse> => {
     const validFilters = filters
         ? Object.entries(filters).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
-                acc[key] = value;
+                acc[key] = value.toString(); // Convert all values to strings
             }
             return acc;
-        }, {} as Filters)
+        }, {} as Record<string, string>)
         : {}; // Default to an empty object if filters are not provided
+
 
     const queryParams = new URLSearchParams({
         userId,
@@ -38,10 +41,8 @@ const fetchExpenses = async (
 
     const data = await response.json();
     console.log("🚀 ~ useExpensesQuery data:", data)
-    return data;
+    return data
 };
-
-
 
 
 const addExpense = async (newExpense: Expense, userId: string): Promise<Expense> => {
@@ -99,6 +100,8 @@ export const useExpensesQuery = (filters?: {
     endDate?: string;
     sortBy?: string;
     sortOrder?: string;
+    page?: number;
+    pageSize?: number;
 }) => {
     const { userId } = useAuth(); // Access userId from context
 
@@ -112,7 +115,7 @@ export const useExpensesQuery = (filters?: {
     } = useQuery({
         queryKey: ['expenses', userId, filters], // Inclui os filtros na chave
         queryFn: () => {
-            if (!userId) return Promise.resolve([]); // Retorna uma promessa vazia se o userId não estiver disponível
+            if (!userId) return Promise.resolve({ data: [], meta: null }); // Retorna uma promessa vazia se o userId não estiver disponível
             return fetchExpenses(userId, filters);  // Passa os dois argumentos corretamente
         },
         enabled: !!userId, // Apenas executa a consulta se userId estiver disponível
@@ -166,7 +169,10 @@ export const useExpensesQuery = (filters?: {
     // You can safely return default values or handle loading/error states
     if (!userId) {
         return {
-            expenses: [],
+            expenses: {
+                data: [],
+                meta: null
+            },
             isExpensesLoading: false,
             expensesError: null,
             createExpense: () => { },

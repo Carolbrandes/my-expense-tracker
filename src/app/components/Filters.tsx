@@ -7,12 +7,17 @@ import { TransactionType } from "../types/interfaces";
 
 export const Filters = () => {
     const [filterCategory, setFilterCategory] = useState('');
+    console.log("🚀 ~ Filters ~ filterCategory:", filterCategory)
     const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
+    console.log("🚀 ~ Filters ~ filterDate:", filterDate)
     const [filterDescription, setFilterDescription] = useState('');
+    console.log("🚀 ~ Filters ~ filterDescription:", filterDescription)
     const [filterType, setFilterType] = useState<TransactionType | ''>('');
+    console.log("🚀 ~ Filters ~ filterType:", filterType)
 
-    const { isMobile, updateFilteredExpenses } = useTransaction();
+    const { isMobile, updateFilteredExpenses, currentPage } = useTransaction();
     const { categories } = useCategoriesQuery();
+
 
     const filters = useMemo(() => ({
         description: filterDescription || undefined,
@@ -20,15 +25,18 @@ export const Filters = () => {
         type: filterType || undefined,
         startDate: filterDate.startDate || undefined,
         endDate: filterDate.endDate || undefined,
-    }), [filterDescription, filterCategory, filterType, filterDate]);
+        currentPage
+    }), [filterDescription, filterCategory, filterType, filterDate, currentPage]);
+    console.log("🚀 ~ filters ~ filters:", filters)
 
     const { expenses } = useExpensesQuery(filters);
 
     useEffect(() => {
-        if (expenses) {
-            updateFilteredExpenses(expenses);
+        if (expenses?.data.length) {
+            console.log("🚀 ~ useEffect ~ expenses:", expenses)
+            updateFilteredExpenses(expenses.data);
         }
-    }, [expenses, updateFilteredExpenses]);
+    }, [expenses]);
 
     const clearFilters = () => {
         setFilterCategory('');

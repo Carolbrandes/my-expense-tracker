@@ -13,6 +13,16 @@ export interface Expense {
     userId: number | string
 };
 
+export interface ExpenseResponse {
+    data: Expense[] | []
+    meta: {
+        totalCount: number
+        totalPages: number
+        currentPage: number
+        pageSize: number
+    } | null
+}
+
 export type ExpenseDelete = Pick<Expense, 'id' | 'description'>
 
 export interface Category {

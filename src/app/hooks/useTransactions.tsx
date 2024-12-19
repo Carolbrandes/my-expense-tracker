@@ -47,6 +47,10 @@ interface TransactionContextProps {
     sortCriteria: SortCriteria
     defineSortCriteria: (column: string) => void
 
+    currentPage: number
+    updateCurrentPage: (page: number) => void
+    pageSize: number
+
 }
 
 const TransactionContext = createContext<TransactionContextProps>(
@@ -56,7 +60,7 @@ const TransactionContext = createContext<TransactionContextProps>(
 
 export function TransactionProvider({ children }: TransactionProviderProps) {
     const { expenses } = useExpensesQuery(); // Get updated expenses from your query
-    const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
+    const [filteredExpenses, setFilteredExpenses] = useState<Expense[] | []>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -65,9 +69,13 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         column: 'description',
         direction: 'asc',
     });
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [pageSize] = useState(5);
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+    const updateCurrentPage = (page: number) => setCurrentPage(page)
 
     const updateLoading = (isLoading: boolean) => setLoading(isLoading);
 
@@ -124,10 +132,12 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
     // Automatically update filteredExpenses whenever `expenses` changes
     useEffect(() => {
-        console.log("🚀 ~ useTransactions filtered expenses:", expenses)
-        if (expenses) {
-            updateFilteredExpenses(expenses);
+
+        if (expenses?.data?.length) {
+            updateFilteredExpenses(expenses.data);
         }
+
+
     }, [expenses, sortCriteria]); // Recalculate if sort criteria changes
 
     const contextValue: TransactionContextProps = {
@@ -145,6 +155,9 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         defineDeleteTarget,
         sortCriteria,
         defineSortCriteria,
+        currentPage,
+        updateCurrentPage,
+        pageSize
     };
 
     return (

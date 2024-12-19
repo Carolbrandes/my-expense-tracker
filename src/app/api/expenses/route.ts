@@ -46,6 +46,8 @@ export async function GET(request: Request) {
         const sortOrder = searchParams.get('sortOrder') || 'asc';
         const startDate = searchParams.get('startDate');
         const endDate = searchParams.get('endDate');
+        const page = parseInt(searchParams.get('page') || '1', 10);
+        const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
 
         // Validate userId
         if (!userId || isNaN(Number(userId))) {
@@ -62,6 +64,10 @@ export async function GET(request: Request) {
 
         if (!allowedSortOrder.includes(sortOrder)) {
             return NextResponse.json({ message: `Invalid sortOrder value. Allowed: ${allowedSortOrder.join(', ')}` }, { status: 400 });
+        }
+
+        if (page < 1 || pageSize < 1) {
+            return NextResponse.json({ message: 'Page and pageSize must be greater than 0.' }, { status: 400 });
         }
 
         // Prepare filters
@@ -90,16 +96,29 @@ export async function GET(request: Request) {
 
         console.log("🚀 ~ GET ~ filters:", filters)
 
-        // Fetch from database
-        const expenses = await prisma.expense.findMany({
-            where: filters,
-            orderBy: {
-                [sortBy]: sortOrder,
-            },
-        });
-        console.log("🚀 ~ GET ~ expenses:", expenses)
+        const [expenses, totalCount] = await Promise.all([
+            prisma.expense.findMany({
+                where: filters,
+                orderBy: {
+                    [sortBy]: sortOrder,
+                },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            prisma.expense.count({ where: filters }),
+        ]);
 
-        return NextResponse.json(expenses, { status: 200 });
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        return NextResponse.json({
+            data: expenses,
+            meta: {
+                totalCount,
+                totalPages,
+                currentPage: page,
+                pageSize,
+            },
+        }, { status: 200 });
     } catch (error) {
         console.error('Error fetching expenses:', error);
         return NextResponse.json({ message: 'Failed to fetch expenses' }, { status: 500 });
