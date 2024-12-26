@@ -9,7 +9,7 @@ import {
     useEffect,
     useState
 } from 'react';
-import { Expense, SortCriteria } from '../types/interfaces';
+import { Expense, FilterProps, SortCriteria } from '../types/interfaces';
 import { useExpensesQuery } from './useExpensesQuery';
 
 
@@ -47,9 +47,13 @@ interface TransactionContextProps {
     sortCriteria: SortCriteria
     defineSortCriteria: (column: string) => void
 
-    currentPage: number
-    updateCurrentPage: (page: number) => void
+    page: number
+    updatePage: (page: number) => void
     pageSize: number
+
+    filters: FilterProps,
+    updateFilters: (filters: FilterProps) => void
+
 
 }
 
@@ -59,7 +63,6 @@ const TransactionContext = createContext<TransactionContextProps>(
 
 
 export function TransactionProvider({ children }: TransactionProviderProps) {
-    const { expenses } = useExpensesQuery(); // Get updated expenses from your query
     const [filteredExpenses, setFilteredExpenses] = useState<Expense[] | []>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -69,13 +72,28 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         column: 'description',
         direction: 'asc',
     });
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [filters, setFilters] = useState<FilterProps>({
+        description: "",
+        category: "",
+        type: "",
+        startDate: "",
+        endDate: "",
+        sortBy: "",
+        sortOrder: "desc"
+    } as FilterProps)
+    console.log("🚀 ~ TransactionProvider ~ filters:", filters)
+    const [page, setPage] = useState<number>(1);
+    console.log("🚀 ~ TransactionProvider ~ Page:", page)
     const [pageSize] = useState(5);
+
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+    const { expenses } = useExpensesQuery(page, pageSize, filters,);
 
-    const updateCurrentPage = (page: number) => setCurrentPage(page)
+    const updateFilters = (filters: FilterProps) => setFilters((prev) => ({ ...prev, filters }))
+
+    const updatePage = (page: number) => setPage(page)
 
     const updateLoading = (isLoading: boolean) => setLoading(isLoading);
 
@@ -130,15 +148,14 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         });
     };
 
-    // Automatically update filteredExpenses whenever `expenses` changes
-    useEffect(() => {
 
+    useEffect(() => {
         if (expenses?.data?.length) {
             updateFilteredExpenses(expenses.data);
         }
+    }, [expenses, sortCriteria]);
 
 
-    }, [expenses, sortCriteria]); // Recalculate if sort criteria changes
 
     const contextValue: TransactionContextProps = {
         filteredExpenses,
@@ -155,9 +172,11 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         defineDeleteTarget,
         sortCriteria,
         defineSortCriteria,
-        currentPage,
-        updateCurrentPage,
-        pageSize
+        page,
+        updatePage,
+        pageSize,
+        filters,
+        updateFilters
     };
 
     return (

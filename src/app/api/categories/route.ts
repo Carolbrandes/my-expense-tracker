@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 // Get categories for the current user
 export async function GET(req: Request) {
   try {
-    const userId = await getUserIdFromRequest(req); // Implement this function as needed
+    const userId = await getUserIdFromRequest(req);
 
     if (!userId) {
       return NextResponse.json({ message: "User not authenticated" }, { status: 401 });
@@ -28,7 +28,7 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const { name } = await req.json();
-    const userId = await getUserIdFromRequest(req); // Implement this function as needed
+    const userId = await getUserIdFromRequest(req);
 
     if (!userId) {
       return NextResponse.json({ message: "User not authenticated" }, { status: 401 });
@@ -57,9 +57,8 @@ export async function POST(req: Request) {
   }
 }
 
-// Helper function to extract userId
+
 async function getUserIdFromRequest(req: Request): Promise<number | null> {
-  // Replace with actual user ID extraction logic
-  const userId = 1; // Example
+  const userId = 1;
   return userId;
 }

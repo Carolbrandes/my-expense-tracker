@@ -9,7 +9,7 @@ export interface Expense {
     category: string;
     amount: number;
     date: string;
-    type: TransactionType;
+    type: TransactionType | string;
     userId: number | string
 };
 
@@ -33,5 +33,15 @@ export interface Category {
 export interface SortCriteria {
     column: string;
     direction: "asc" | "desc"
+}
+
+export interface FilterProps {
+    description: string,
+    category: string,
+    type: TransactionType | string,
+    startDate: string,
+    endDate: string,
+    sortBy?: string;
+    sortOrder?: string;
 }
 

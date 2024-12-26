@@ -7,36 +7,47 @@ import { TransactionType } from "../types/interfaces";
 
 export const Filters = () => {
     const [filterCategory, setFilterCategory] = useState('');
-    console.log("🚀 ~ Filters ~ filterCategory:", filterCategory)
-    const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
-    console.log("🚀 ~ Filters ~ filterDate:", filterDate)
-    const [filterDescription, setFilterDescription] = useState('');
-    console.log("🚀 ~ Filters ~ filterDescription:", filterDescription)
-    const [filterType, setFilterType] = useState<TransactionType | ''>('');
-    console.log("🚀 ~ Filters ~ filterType:", filterType)
 
-    const { isMobile, updateFilteredExpenses, currentPage } = useTransaction();
+    const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
+
+    const [filterDescription, setFilterDescription] = useState('');
+
+    const [filterType, setFilterType] = useState<TransactionType | ''>('');
+
+
+    const { isMobile, updateFilteredExpenses, updateFilters, page, pageSize } = useTransaction();
     const { categories } = useCategoriesQuery();
 
 
     const filters = useMemo(() => ({
-        description: filterDescription || undefined,
-        category: filterCategory || undefined,
-        type: filterType || undefined,
-        startDate: filterDate.startDate || undefined,
-        endDate: filterDate.endDate || undefined,
-        currentPage
-    }), [filterDescription, filterCategory, filterType, filterDate, currentPage]);
-    console.log("🚀 ~ filters ~ filters:", filters)
+        description: filterDescription || "",
+        category: filterCategory || "",
+        type: filterType || "",
+        startDate: filterDate.startDate || "",
+        endDate: filterDate.endDate || "",
+    }), [filterDescription, filterCategory, filterType, filterDate]);
 
-    const { expenses } = useExpensesQuery(filters);
+
+
+    const { expenses } = useExpensesQuery(page, pageSize, filters);
+
 
     useEffect(() => {
         if (expenses?.data.length) {
-            console.log("🚀 ~ useEffect ~ expenses:", expenses)
             updateFilteredExpenses(expenses.data);
         }
     }, [expenses]);
+
+    useEffect(() => {
+        updateFilters({
+            category: filterCategory,
+            type: filterType || "",
+            description: filterDescription,
+            startDate: filterDate.startDate,
+            endDate: filterDate.endDate
+        })
+
+    }, [filterCategory, filterDate, filterType, filterDescription])
 
     const clearFilters = () => {
         setFilterCategory('');

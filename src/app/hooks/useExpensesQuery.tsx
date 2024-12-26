@@ -1,46 +1,43 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Expense, ExpenseDelete, ExpenseResponse } from '../types/interfaces';
-import { useAuth } from './useAuthContext'; // Import the AuthContext hook
+import { Expense, ExpenseDelete, ExpenseResponse, FilterProps } from '../types/interfaces';
+import { useAuth } from './useAuthContext';
 
-interface Filters {
-    description?: string;
-    category?: string;
-    type?: string;
-    startDate?: string;
-    endDate?: string;
-    sortBy?: string;
-    sortOrder?: string;
-    page?: number;
-    pageSize?: number;
-}
+
 
 const fetchExpenses = async (
     userId: string,
-    filters?: Filters
+    page = 1,
+    pageSize = 5,
+    filters?: FilterProps
 ): Promise<ExpenseResponse> => {
+    console.log("🚀 ~ useExpensesQuery fetchExpenses pageSize:", pageSize)
+    console.log("🚀 ~ useExpensesQuery fetchExpenses page:", page)
     const validFilters = filters
         ? Object.entries(filters).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
-                acc[key] = value.toString(); // Convert all values to strings
+                acc[key] = value.toString();
             }
             return acc;
         }, {} as Record<string, string>)
-        : {}; // Default to an empty object if filters are not provided
+        : {};
 
 
     const queryParams = new URLSearchParams({
         userId,
-        ...validFilters, // Only include valid filters
+        ...validFilters,
     });
 
-    const response = await fetch(`/api/expenses?${queryParams.toString()}`);
+
+    console.log("URL Fetch:", `/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`)
+
+    const response = await fetch(`/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`);
 
     if (!response.ok) {
         throw new Error('Failed to fetch expenses');
     }
 
     const data = await response.json();
-    console.log("🚀 ~ useExpensesQuery data:", data)
+
     return data
 };
 
@@ -71,10 +68,10 @@ const editExpense = async (editExpense: Expense) => {
 
     if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message);  // Throw error if request fails
+        throw new Error(errorData.message);
     }
 
-    return res.json();  // Return the updated expense data
+    return res.json();
 };
 
 const deleteExpense = async (deleteExpense: ExpenseDelete) => {
@@ -86,39 +83,34 @@ const deleteExpense = async (deleteExpense: ExpenseDelete) => {
 
     if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message);  // Throw error if request fails
+        throw new Error(errorData.message);
     }
 
-    return id;  // Return the id of the deleted expense
+    return id;
 };
 
-export const useExpensesQuery = (filters?: {
-    description?: string;
-    category?: string;
-    type?: string;
-    startDate?: string;
-    endDate?: string;
-    sortBy?: string;
-    sortOrder?: string;
-    page?: number;
-    pageSize?: number;
-}) => {
-    const { userId } = useAuth(); // Access userId from context
 
-    const queryClient = useQueryClient(); // Access the React Query Client
 
-    // Use query and mutation hooks unconditionally
+export const useExpensesQuery = (
+    page = 1,
+    pageSize = 5,
+    filters?: FilterProps) => {
+    const { userId } = useAuth();
+
+    const queryClient = useQueryClient();
+
+
     const {
         data: expenses,
         isLoading: isExpensesLoading,
         error: expensesError,
     } = useQuery({
-        queryKey: ['expenses', userId, filters], // Inclui os filtros na chave
+        queryKey: ['expenses', userId, page, pageSize, filters],
         queryFn: () => {
-            if (!userId) return Promise.resolve({ data: [], meta: null }); // Retorna uma promessa vazia se o userId não estiver disponível
-            return fetchExpenses(userId, filters);  // Passa os dois argumentos corretamente
+            if (!userId) return Promise.resolve({ data: [], meta: null });
+            return fetchExpenses(userId, page, pageSize, filters);
         },
-        enabled: !!userId, // Apenas executa a consulta se userId estiver disponível
+        enabled: !!userId,
     });
 
 
@@ -129,17 +121,17 @@ export const useExpensesQuery = (filters?: {
     } = useMutation({
         mutationFn: (newExpense: Expense) => {
             if (!userId) {
-                return Promise.resolve(null); // Safely return when userId is not available
+                return Promise.resolve(null);
             }
-            return addExpense(newExpense, userId); // Perform the mutation if userId is available
+            return addExpense(newExpense, userId);
         },
         onSuccess: () => {
-            // Invalidate the expenses query to refresh the list
+
             queryClient.invalidateQueries({ queryKey: ['expenses', userId] });
         },
     });
 
-    // Mutation for editing an expense
+
     const {
         mutate: updateExpense,
         status: updateStatus,
@@ -152,7 +144,7 @@ export const useExpensesQuery = (filters?: {
         },
     });
 
-    // Mutation for deleting an expense
+
     const {
         mutate: removeExpense,
         status: deleteStatus,
@@ -160,13 +152,13 @@ export const useExpensesQuery = (filters?: {
     } = useMutation({
         mutationFn: deleteExpense,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['expenses', userId] }); // Invalidate query to refresh data
+            queryClient.invalidateQueries({ queryKey: ['expenses', userId] });
         },
     });
 
     const isCreating = status === 'pending';
 
-    // You can safely return default values or handle loading/error states
+
     if (!userId) {
         return {
             expenses: {

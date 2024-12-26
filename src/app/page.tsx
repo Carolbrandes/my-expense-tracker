@@ -12,12 +12,12 @@ export default function Home() {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      router.push("/login"); // Redirect to login page if not authenticated
+      router.push("/login");
     }
   }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
-    return null; // Avoid rendering anything while redirecting
+    return null;
   }
 
   return < TransactionProvider userId={userId}>

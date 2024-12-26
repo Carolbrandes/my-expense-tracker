@@ -18,7 +18,7 @@ export async function POST(req: Request) {
         // Find the user or create a new one if it doesn't exist
         const user = await prisma.user.upsert({
             where: { email },
-            update: {}, // No updates are needed if the user already exists
+            update: {},
             create: { email },
         });
 

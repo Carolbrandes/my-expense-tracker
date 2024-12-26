@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Category } from '../types/interfaces';
-import { useAuth } from './useAuthContext'; // Import the AuthContext hook
+import { useAuth } from './useAuthContext';
 
 
 
@@ -9,8 +9,8 @@ const fetchCategories = async (userId: string): Promise<Category[]> => {
     if (!response.ok) {
         throw new Error('Failed to fetch categories');
     }
-    const data = await response.json();  // Read the response body once
-    console.log("🚀 ~ fetchCategories ~ data:", data);  // Log the parsed data
+    const data = await response.json();
+
     return data;
 };
 
@@ -30,19 +30,19 @@ const addCategory = async (newCategory: string, userId: string): Promise<Categor
 };
 
 export const useCategoriesQuery = () => {
-    const { userId } = useAuth(); // Access userId from context
-    console.log("🚀 ~ useCategoriesQuery ~ userId:", userId)
-    const queryClient = useQueryClient(); // Access the React Query Client
+    const { userId } = useAuth();
 
-    // Use query and mutation hooks unconditionally
+    const queryClient = useQueryClient();
+
+
     const {
         data: categories,
         isLoading: isCategoriesLoading,
         error: categoriesError,
     } = useQuery({
         queryKey: ['categories', userId],
-        queryFn: () => (userId ? fetchCategories(userId) : Promise.resolve([])), // Only fetch if userId is available
-        enabled: !!userId, // The query only runs when userId is available
+        queryFn: () => (userId ? fetchCategories(userId) : Promise.resolve([])),
+        enabled: !!userId,
     });
 
     const {
@@ -52,19 +52,18 @@ export const useCategoriesQuery = () => {
     } = useMutation({
         mutationFn: (newCategory: string) => {
             if (!userId) {
-                return Promise.resolve(null); // Safely return when userId is not available
+                return Promise.resolve(null);
             }
-            return addCategory(newCategory, userId); // Perform the mutation if userId is available
+            return addCategory(newCategory, userId);
         },
         onSuccess: () => {
-            // Invalidate the categories query to refresh the list
             queryClient.invalidateQueries({ queryKey: ['categories', userId] });
         },
     });
 
     const isCreating = status === 'pending';
 
-    // You can safely return default values or handle loading/error states
+
     if (!userId) {
         return {
             categories: [],

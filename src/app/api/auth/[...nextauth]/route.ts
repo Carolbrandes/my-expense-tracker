@@ -11,14 +11,12 @@ export const handler = NextAuth({
     callbacks: {
         async jwt({ token, user }) {
             if (user) {
-                // Ensure user.id is a string before assignment
                 token.userId = typeof user.id === 'string' ? user.id : '';
             }
             return token;
         },
         async session({ session, token }) {
             if (token?.userId && session.user) {
-                // Ensure token.userId is a string before assignment
                 session.user.id = typeof token.userId === 'string' ? token.userId : '';
             }
             return session;

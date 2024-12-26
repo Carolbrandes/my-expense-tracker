@@ -36,20 +36,19 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
             category,
             amount: parseFloat(amount),
             date,
-            type: mapTypeToTransactionType(type as string), // Map type correctly
+            type: mapTypeToTransactionType(type as string),
         };
 
 
 
-        updateExpense(expenseUpdate); // Ensure this updates the correct record
+        updateExpense(expenseUpdate);
 
-        selectExpenseToEdit(null); // Exit edit mode
+        selectExpenseToEdit(null);
     };
 
 
 
     const handleDel = () => {
-        //* abrir a modal e definir no estado qual transacao que vai ser deletada, no modal delete vai ser chamada a fn para deletar
         defineDeleteTarget({ id: +expense.id, description: expense.description })
         handleCancelModal(true);
     }
@@ -62,7 +61,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 setCategory(expenseToEdit.category);
                 setAmount(expenseToEdit.amount.toString());
 
-                // Ajustar o formato da data para YYYY-MM-DD
+                // Adjust to date format YYYY-MM-DD
                 const formattedDate = new Date(expenseToEdit.date).toISOString().split('T')[0];
 
                 setDate(formattedDate);
@@ -137,7 +136,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                         size="small"
                     />
                 ) : (
-                    formatDateFromISO(expense.date) // Use the helper function to format the date
+                    formatDateFromISO(expense.date)
                 )}
             </TableCell>
             <TableCell>

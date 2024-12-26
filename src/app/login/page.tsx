@@ -38,7 +38,7 @@ export default function LoginPage() {
         if (token && isTokenValid(token)) {
             updateAuthenticated(true);
             updateUserId(jwtDecode(token).userId); // Update user ID from token
-            router.push("/"); // Redirect to home if already authenticated
+            router.push("/");
         } else {
             localStorage.removeItem("auth_token");
             updateAuthenticated(false);
@@ -79,11 +79,11 @@ export default function LoginPage() {
                 const token = data.token;
 
                 if (token) {
-                    localStorage.setItem("auth_token", token); // Save token
-                    updateUserId(data.userId); // Update user ID
-                    updateAuthenticated(true); // Mark user as authenticated
+                    localStorage.setItem("auth_token", token);
+                    updateUserId(data.userId);
+                    updateAuthenticated(true);
                     setMessage("Login realizado com sucesso!");
-                    router.push("/"); // Redirect to home
+                    router.push("/");
                 } else {
                     console.error("Token is missing in the response.");
                     setMessage("Erro no login. Tente novamente.");

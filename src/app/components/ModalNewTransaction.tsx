@@ -28,7 +28,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
-    const { createExpense } = useExpensesQuery()
+    const { createExpense, createError } = useExpensesQuery()
     const { userId } = useAuth()
     const {
         categories,
@@ -44,39 +44,25 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                 id: Date.now().toString(),
                 description,
                 category,
-                // Remove thousand separators and convert to number
                 amount: parseFloat(amount.replace(/\./g, '')),
                 date,
                 type,
-                userId
+                userId,
             };
 
-
-            const res = await fetch('/api/expenses', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            createExpense(newExpense, {
+                onSuccess: () => {
+                    setDescription('');
+                    setCategory('');
+                    setAmount('');
+                    setDate('');
+                    setType(TransactionType.Expense);
+                    setOpenModal(false);
                 },
-                body: JSON.stringify(newExpense),
             });
-
-            if (res.ok) {
-                const savedExpense = await res.json();
-
-
-                createExpense(savedExpense)
-
-                // Clear input fields and close the modal
-                setDescription('');
-                setCategory('');
-                setAmount('');
-                setDate('');
-                setType(TransactionType.Expense);
-                setOpenModal(false);
-            }
         }
-
     };
+
 
     const handleType = (event: SelectChangeEvent<TransactionType>) => {
         setType(event.target.value as TransactionType);

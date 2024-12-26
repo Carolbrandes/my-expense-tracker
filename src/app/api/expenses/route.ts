@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 // Add a new expense
 export async function POST(request: Request) {
     const body = await request.json();
+    console.log("🚀 ~ POST ~ body:", body)
     const { description, category, amount, date, type, userId } = body;
 
     if (!userId) {
@@ -26,6 +27,7 @@ export async function POST(request: Request) {
                 userId,
             },
         });
+        console.log("🚀 ~ POST ~ expense:", expense)
 
         return NextResponse.json(expense, { status: 201 });
     } catch (error) {
@@ -43,18 +45,18 @@ export async function GET(request: Request) {
         const category = searchParams.get('category');
         const type = searchParams.get('type');
         const sortBy = searchParams.get('sortBy') || 'date';
-        const sortOrder = searchParams.get('sortOrder') || 'asc';
+        const sortOrder = searchParams.get('sortOrder') || 'desc';
         const startDate = searchParams.get('startDate');
         const endDate = searchParams.get('endDate');
         const page = parseInt(searchParams.get('page') || '1', 10);
         const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
 
-        // Validate userId
+
         if (!userId || isNaN(Number(userId))) {
             return NextResponse.json({ message: 'Valid User ID is required.' }, { status: 400 });
         }
 
-        // Validate sorting parameters
+
         const allowedSortBy = ['date', 'description', 'category'];
         const allowedSortOrder = ['asc', 'desc'];
 
@@ -70,7 +72,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'Page and pageSize must be greater than 0.' }, { status: 400 });
         }
 
-        // Prepare filters
+
         const filters: any = { userId: Number(userId) };
 
 
@@ -94,7 +96,10 @@ export async function GET(request: Request) {
             filters.date = { lte: new Date(endDate) };
         }
 
-        console.log("🚀 ~ GET ~ filters:", filters)
+        console.log("Filters:", filters);
+        console.log("Order by:", { [sortBy]: sortOrder });
+
+
 
         const [expenses, totalCount] = await Promise.all([
             prisma.expense.findMany({
@@ -107,6 +112,8 @@ export async function GET(request: Request) {
             }),
             prisma.expense.count({ where: filters }),
         ]);
+
+        console.log("🚀 ~ GET ~ expenses:", expenses)
 
         const totalPages = Math.ceil(totalCount / pageSize);
 

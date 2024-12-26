@@ -19,18 +19,18 @@ import { useTransaction } from '../hooks/useTransactions';
 
 
 const GrayButton = styled(Button)({
-    backgroundColor: '#92A0A7', // Cor cinza
-    color: 'white', // Cor do texto
+    backgroundColor: '#92A0A7',
+    color: 'white',
     '&:hover': {
-        backgroundColor: '#90A4AE', // Cor ao passar o mouse
+        backgroundColor: '#90A4AE',
     },
 });
 
 
 const ExpensePage = () => {
-    const [openModal, setOpenModal] = useState(false); // Modal para adicionar despesa
-    const [openCategoryModal, setOpenCategoryModal] = useState(false); // Modal para adicionar categoria
-    console.log("🚀 ~ ExpensePage ~ openCategoryModal:", openCategoryModal)
+    const [openModal, setOpenModal] = useState(false);
+    const [openCategoryModal, setOpenCategoryModal] = useState(false);
+
 
     const { isMobile } = useTransaction()
     const { isExpensesLoading } = useExpensesQuery()

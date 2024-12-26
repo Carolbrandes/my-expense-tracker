@@ -8,16 +8,18 @@ import { TransactionsTableHeader } from './TransactionsTableHeader';
 
 export const TransactionsDesk = () => {
 
-    const { filteredExpenses, currentPage } = useTransaction()
+    const { filteredExpenses, page } = useTransaction()
+    console.log("🚀 ~ TransactionsDesk ~ page:", page)
     const { expenses } = useExpensesQuery();
 
 
 
-    if (!filteredExpenses && !expenses?.meta && isNaN(currentPage) && !currentPage) {
+    if (!filteredExpenses && !expenses?.meta && isNaN(page) && !page) {
         return
     }
 
     const totalPages = expenses?.meta?.totalPages || 1;
+    console.log("🚀 ~ TransactionsDesk ~ totalPages:", totalPages)
 
 
 
@@ -32,8 +34,10 @@ export const TransactionsDesk = () => {
                 </TableBody>
             </Table>
 
+
+
             <PaginationComponent
-                currentPage={currentPage}
+                page={page}
                 totalPages={totalPages}
 
             />

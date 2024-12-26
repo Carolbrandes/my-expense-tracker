@@ -12,7 +12,7 @@ const OutlineGrayButton = styled(Button)({
     color: '#92A0A7',
     background: 'transparent',
     '&:hover': {
-        color: '#90A4AE', // Cor ao passar o mouse
+        color: '#90A4AE',
     },
 });
 
@@ -20,8 +20,8 @@ export const ModalNewCategory = ({
     openCategoryModal,
     setOpenCategoryModal,
 }: ModalNewCategoryProps) => {
-    const [newCategory, setNewCategory] = useState(''); // For new category input
-    const [categoryError, setCategoryError] = useState<string | null>(null); // For duplicate category error
+    const [newCategory, setNewCategory] = useState('');
+    const [categoryError, setCategoryError] = useState<string | null>(null);
 
     const {
         categories,
@@ -32,25 +32,25 @@ export const ModalNewCategory = ({
         createError,
     } = useCategoriesQuery();
 
-    console.log("🚀 ~ categories:", categories)
+
 
     const handleCategorySubmit = async () => {
-        if (!newCategory.trim()) return; // Prevent empty input
+        if (!newCategory.trim()) return;
 
         const categoryToSave = newCategory.toLowerCase();
 
-        // Validate if the category already exists
+
         if (categories?.some((cat) => cat.name === categoryToSave)) {
             setCategoryError('Essa categoria já existe.');
             return;
         }
 
-        // Proceed with creating the new category via mutation
+
         try {
-            createCategory(newCategory); // Trigger the mutation
-            setNewCategory(''); // Clear the input field
-            setCategoryError(null); // Clear any error messages
-            setOpenCategoryModal(false); // Close the modal
+            createCategory(newCategory);
+            setNewCategory('');
+            setCategoryError(null);
+            setOpenCategoryModal(false);
         } catch (error) {
             console.error('Erro ao salvar a categoria:', error);
             setCategoryError('Erro inesperado. Tente novamente.');
@@ -71,7 +71,7 @@ export const ModalNewCategory = ({
                     required
                     fullWidth
                     margin="normal"
-                    error={!!categoryError} // Show error if exists
+                    error={!!categoryError}
                     helperText={categoryError || ''}
                 />
                 {/* Display existing categories */}
