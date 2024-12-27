@@ -50,6 +50,7 @@ interface TransactionContextProps {
     page: number
     updatePage: (page: number) => void
     pageSize: number
+    totalPages: number
 
     filters: FilterProps,
     updateFilters: (filters: FilterProps) => void
@@ -81,17 +82,17 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         sortBy: "",
         sortOrder: "desc"
     } as FilterProps)
-    console.log("🚀 ~ TransactionProvider ~ filters:", filters)
+
     const [page, setPage] = useState<number>(1);
-    console.log("🚀 ~ TransactionProvider ~ Page:", page)
     const [pageSize] = useState(5);
+    const [totalPages, setTotalPages] = useState(0)
 
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { expenses } = useExpensesQuery(page, pageSize, filters,);
+    const { expenses } = useExpensesQuery(page, pageSize, filters);
 
-    const updateFilters = (filters: FilterProps) => setFilters((prev) => ({ ...prev, filters }))
+    const updateFilters = (filters: FilterProps) => setFilters((prev) => ({ ...prev, ...filters }))
 
     const updatePage = (page: number) => setPage(page)
 
@@ -153,7 +154,11 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         if (expenses?.data?.length) {
             updateFilteredExpenses(expenses.data);
         }
-    }, [expenses, sortCriteria]);
+
+        if (expenses?.meta?.totalPages) {
+            setTotalPages(expenses.meta.totalPages);
+        }
+    }, [expenses, filters, page]);
 
 
 
@@ -175,6 +180,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         page,
         updatePage,
         pageSize,
+        totalPages,
         filters,
         updateFilters
     };

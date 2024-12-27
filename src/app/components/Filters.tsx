@@ -1,7 +1,6 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCategoriesQuery } from "../hooks/useCategoriesQuery";
-import { useExpensesQuery } from "../hooks/useExpensesQuery";
 import { useTransaction } from "../hooks/useTransactions";
 import { TransactionType } from "../types/interfaces";
 
@@ -14,29 +13,9 @@ export const Filters = () => {
 
     const [filterType, setFilterType] = useState<TransactionType | ''>('');
 
+    const { isMobile, updateFilters } = useTransaction();
 
-    const { isMobile, updateFilteredExpenses, updateFilters, page, pageSize } = useTransaction();
     const { categories } = useCategoriesQuery();
-
-
-    const filters = useMemo(() => ({
-        description: filterDescription || "",
-        category: filterCategory || "",
-        type: filterType || "",
-        startDate: filterDate.startDate || "",
-        endDate: filterDate.endDate || "",
-    }), [filterDescription, filterCategory, filterType, filterDate]);
-
-
-
-    const { expenses } = useExpensesQuery(page, pageSize, filters);
-
-
-    useEffect(() => {
-        if (expenses?.data.length) {
-            updateFilteredExpenses(expenses.data);
-        }
-    }, [expenses]);
 
     useEffect(() => {
         updateFilters({

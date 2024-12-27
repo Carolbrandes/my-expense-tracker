@@ -1,4 +1,3 @@
-import { useExpensesQuery } from "@/app/hooks/useExpensesQuery";
 import { useTransaction } from "@/app/hooks/useTransactions";
 import { Paper, Table, TableBody, TableContainer } from "@mui/material";
 import { PaginationComponent } from "../PaginationComponent";
@@ -9,18 +8,11 @@ import { TransactionsTableHeader } from './TransactionsTableHeader';
 export const TransactionsDesk = () => {
 
     const { filteredExpenses, page } = useTransaction()
-    console.log("🚀 ~ TransactionsDesk ~ page:", page)
-    const { expenses } = useExpensesQuery();
 
 
-
-    if (!filteredExpenses && !expenses?.meta && isNaN(page) && !page) {
+    if (!filteredExpenses && isNaN(page) && !page) {
         return
     }
-
-    const totalPages = expenses?.meta?.totalPages || 1;
-    console.log("🚀 ~ TransactionsDesk ~ totalPages:", totalPages)
-
 
 
     return (
@@ -38,8 +30,6 @@ export const TransactionsDesk = () => {
 
             <PaginationComponent
                 page={page}
-                totalPages={totalPages}
-
             />
 
         </TableContainer>

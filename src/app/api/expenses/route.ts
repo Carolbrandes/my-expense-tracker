@@ -77,10 +77,10 @@ export async function GET(request: Request) {
 
 
         if (description) {
-            filters.description = { contains: String(description), mode: 'insensitive' };
+            filters.description = { contains: String(description) };
         }
         if (category) {
-            filters.category = { contains: String(category), mode: 'insensitive' };
+            filters.category = { contains: String(category) };
         }
         if (type) {
             filters.type = { equals: String(type) };

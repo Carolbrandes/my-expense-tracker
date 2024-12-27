@@ -10,8 +10,7 @@ const fetchExpenses = async (
     pageSize = 5,
     filters?: FilterProps
 ): Promise<ExpenseResponse> => {
-    console.log("🚀 ~ useExpensesQuery fetchExpenses pageSize:", pageSize)
-    console.log("🚀 ~ useExpensesQuery fetchExpenses page:", page)
+
     const validFilters = filters
         ? Object.entries(filters).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
@@ -21,11 +20,13 @@ const fetchExpenses = async (
         }, {} as Record<string, string>)
         : {};
 
+    console.log("🚀 ~ validFilters:", validFilters)
 
     const queryParams = new URLSearchParams({
         userId,
         ...validFilters,
     });
+    console.log("🚀 ~ queryParams:", queryParams)
 
 
     console.log("URL Fetch:", `/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`)
@@ -38,7 +39,10 @@ const fetchExpenses = async (
 
     const data = await response.json();
 
-    return data
+    return {
+        data: data.data,
+        meta: data.meta
+    };
 };
 
 
