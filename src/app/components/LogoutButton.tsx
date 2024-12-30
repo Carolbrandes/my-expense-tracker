@@ -1,6 +1,7 @@
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined';
 import { Button } from "@mui/material";
 import { signOut } from "next-auth/react";
-import { useAuth } from "../../hooks/useAuthContext";
+import { useAuth } from "../hooks/useAuthContext";
 
 export const LogoutButton = () => {
     const { updateAuthenticated, updateUserId } = useAuth()
@@ -13,7 +14,11 @@ export const LogoutButton = () => {
     };
 
     return (
-        <Button color="secondary" onClick={handleLogout}>Logout</Button>
+        <Button title="Sair" sx={{
+            color: (theme) => theme.palette.text.secondary, // Use text.secondary here
+        }} onClick={handleLogout}>
+            <LogoutOutlinedIcon />
+        </Button>
     );
 };
 

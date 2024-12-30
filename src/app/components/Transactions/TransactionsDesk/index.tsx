@@ -16,23 +16,22 @@ export const TransactionsDesk = () => {
 
 
     return (
-        <TableContainer component={Paper}>
-            <Table>
-                <TransactionsTableHeader />
-                <TableBody>
-                    {filteredExpenses?.map((expense) => (
-                        <TransactionRow key={expense.id} expense={expense} />
-                    ))}
-                </TableBody>
-            </Table>
-
-
+        <>
+            <TableContainer component={Paper}>
+                <Table>
+                    <TransactionsTableHeader />
+                    <TableBody>
+                        {filteredExpenses?.map((expense) => (
+                            <TransactionRow key={expense.id} expense={expense} />
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
             <PaginationComponent
                 page={page}
             />
-
-        </TableContainer>
+        </>
 
     );
 

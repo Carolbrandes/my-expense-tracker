@@ -20,12 +20,12 @@ export const PaginationComponent = ({ page }: PaginationProps) => {
     };
 
     return (
-        <Box display="flex" justifyContent="center" mt={2}>
+        <Box display="flex" justifyContent="center" mt={4} mb={4}>
             <Pagination
                 count={totalPages}
                 page={page}
                 onChange={handlePageChange}
-                color="primary"
+                color="secondary"
                 onClick={() => console.log("cliquei botao paginacao")}
             />
         </Box>

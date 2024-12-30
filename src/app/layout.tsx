@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "./hooks/useAuthContext";
+import { ThemeModeProvider } from "./hooks/useThemeMode";
 import ReactQueryProvider from "./providers/react-query-provider";
 
 const geistSans = localFont({
@@ -28,12 +29,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <AuthProvider>
-          <ReactQueryProvider>
-            {children}
-          </ReactQueryProvider>
-        </AuthProvider>
-
+        <ThemeModeProvider>
+          <AuthProvider>
+            <ReactQueryProvider>
+              {children}
+            </ReactQueryProvider>
+          </AuthProvider>
+        </ThemeModeProvider>
       </body>
     </html>
   );
