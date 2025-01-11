@@ -32,9 +32,9 @@ export const TransactionsMobile = () => {
 
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ width: '95%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {filteredExpenses?.map((expense) => (
-                <Paper key={expense.id} style={{ padding: '1rem', position: 'relative', border: '1px solid #ddd' }}>
+                <Paper key={expense.id} style={{ width: '95%', padding: '1rem', position: 'relative', border: '1px solid #ddd' }}>
                     <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.25rem' }}>
                         <Button sx={{ minWidth: '5px' }} aria-label="edit" onClick={() => handleEdit(expense)} color="primary">
                             <EditIcon />
@@ -49,7 +49,7 @@ export const TransactionsMobile = () => {
                             whiteSpace: "nowrap",
                             overflow: "hidden",
                             textOverflow: "ellipsis",
-                            width: '200px'
+                            width: '95%'
                         }}><strong>Descrição:</strong> {expense.description}</div>
                         <div><strong>Categoria:</strong> {expense.category}</div>
                         <div style={{ color: expense.type === TransactionType.Expense ? 'red' : 'green' }}>

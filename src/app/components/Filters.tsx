@@ -1,4 +1,5 @@
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import { useTheme } from '@mui/material/styles';
 import { useEffect, useState } from "react";
 import { useCategoriesQuery } from "../hooks/useCategoriesQuery";
 import { useTransaction } from "../hooks/useTransactions";
@@ -16,6 +17,8 @@ export const Filters = () => {
     const { isMobile, updateFilters } = useTransaction();
 
     const { categories } = useCategoriesQuery();
+
+    const theme = useTheme();
 
     useEffect(() => {
         updateFilters({
@@ -43,31 +46,30 @@ export const Filters = () => {
                 width: '80%',
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                gap: 2,
+                gap: 5,
                 paddingY: isMobile ? '15px' : '30px'
             }}
         >
+
             <TextField
                 label="Descrição"
                 value={filterDescription}
                 onChange={(e) => setFilterDescription(e.target.value)}
                 fullWidth
                 size="small"
+                id="standard-basic"
+                variant="standard"
+                sx={{
+                    "& .MuiOutlinedInput-root": {
+                        borderColor: "inherit",
+                    },
+                    "& .MuiInputLabel-root": {
+                        color: "inherit",
+                    },
+                }}
             />
-            <FormControl fullWidth size="small">
-                <InputLabel>Categoria</InputLabel>
-                <Select
-                    value={filterCategory}
-                    onChange={(e) => setFilterCategory(e.target.value)}
-                >
-                    <MenuItem value="">Todas</MenuItem>
-                    {safeCategories.map(({ id, name }) => (
-                        <MenuItem key={id} value={name}>
-                            {name}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
+
+
             <TextField
                 label="Start Date"
                 type="date"
@@ -78,7 +80,18 @@ export const Filters = () => {
                     shrink: true,
                 }}
                 size="small"
+                id="standard-basic"
+                variant="standard"
+                sx={{
+                    '& input[type="date"]::-webkit-calendar-picker-indicator': {
+                        filter: `invert(${theme.palette.text.primary})`,
+                    },
+                    '& input[type="date"]::-webkit-clear-button': {
+                        display: 'none',
+                    },
+                }}
             />
+
             <TextField
                 label="End Date"
                 type="date"
@@ -89,10 +102,63 @@ export const Filters = () => {
                     shrink: true,
                 }}
                 size="small"
+                id="standard-basic"
+                variant="standard"
             />
-            <FormControl fullWidth size="small">
-                <InputLabel>Tipo</InputLabel>
+
+            <FormControl
+                fullWidth
+                size="small"
+                id="standard-basic"
+                variant="standard"
+                sx={{
+                    "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "inherit", // Styles the border
+                    },
+                    "& .MuiInputLabel-root": {
+                        color: "inherit", // Styles the label text
+                    },
+                    "& .Mui-focused .MuiInputLabel-root": {
+                        color: "primary.main", // Changes label color on focus
+                    },
+                }}
+            >
+                <InputLabel id="category-label">Categoria</InputLabel>
                 <Select
+                    labelId="category-label"
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+
+                >
+                    <MenuItem value="">Todas</MenuItem>
+                    {safeCategories.map(({ id, name }) => (
+                        <MenuItem key={id} value={name}>
+                            {name}
+                        </MenuItem>
+                    ))}
+                </Select>
+            </FormControl>
+
+            <FormControl
+                fullWidth
+                size="small"
+                id="standard-basic"
+                variant="standard"
+                sx={{
+                    "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "inherit", // Styles the border
+                    },
+                    "& .MuiInputLabel-root": {
+                        color: "inherit", // Styles the label text
+                    },
+                    "& .Mui-focused .MuiInputLabel-root": {
+                        color: "primary.main", // Changes label color on focus
+                    },
+                }}
+            >
+                <InputLabel id="type-label" >Tipo</InputLabel>
+                <Select
+                    labelId="type-label"
                     value={filterType}
                     onChange={(e: SelectChangeEvent<TransactionType>) => setFilterType(e.target.value as "" | TransactionType)}
                 >
@@ -105,7 +171,11 @@ export const Filters = () => {
                 variant="outlined"
                 color="secondary"
                 onClick={clearFilters}
-                sx={{ minWidth: '160px' }}
+                sx={{
+                    minWidth: '160px',
+                    color: (theme) => theme.palette.text.primary,
+                    borderColor: (theme) => theme.palette.text.primary
+                }}
             >
                 Limpar Filtros
             </Button>

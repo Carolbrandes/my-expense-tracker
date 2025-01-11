@@ -1,7 +1,7 @@
 'use client';
 
 import { CssBaseline, ThemeProvider } from '@mui/material';
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { darkTheme, lightTheme } from '../../lib/theme';
 
 const ThemeModeContext = createContext({
@@ -12,8 +12,19 @@ const ThemeModeContext = createContext({
 export const ThemeModeProvider = ({ children }: { children: React.ReactNode }) => {
   const [mode, setMode] = useState<'light' | 'dark'>('light');
 
+  useEffect(() => {
+    const savedMode = localStorage.getItem('theme-mode') as 'light' | 'dark';
+    if (savedMode) {
+      setMode(savedMode);
+    }
+  }, []);
+
   const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'));
+    setMode((prevMode) => {
+      const newMode = prevMode === 'light' ? 'dark' : 'light';
+      localStorage.setItem('theme-mode', newMode);
+      return newMode;
+    });
   };
 
   const appliedTheme = mode === 'light' ? lightTheme : darkTheme;

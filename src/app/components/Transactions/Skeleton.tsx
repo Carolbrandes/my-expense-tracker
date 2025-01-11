@@ -1,5 +1,6 @@
 import { useTransaction } from '../../hooks//useTransactions'
 import { SkeletonTable } from './TransactionsDesk/SkeletonTable'
+import SkeletonMobile from './TransactionsMobile/SkeletonMobile'
 
 export const Skeleton = () => {
     const { isMobile } = useTransaction()
@@ -7,7 +8,7 @@ export const Skeleton = () => {
     return (
         <>
             {
-                isMobile ? <div>loading</div> : <SkeletonTable />
+                isMobile ? <SkeletonMobile /> : <SkeletonTable />
             }
 
         </>

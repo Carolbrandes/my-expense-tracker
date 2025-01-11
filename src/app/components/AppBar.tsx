@@ -6,6 +6,7 @@ import Container from '@mui/material/Container';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
+import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import * as React from 'react';
@@ -23,6 +24,7 @@ interface AppBarProps {
 function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction }: AppBarProps) {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 
+    const theme = useTheme();
 
     const actions = [
         {
@@ -48,7 +50,11 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
         <AppBar position="static">
             <Container maxWidth="xl">
                 <Toolbar disableGutters>
-                    <SavingsOutlinedIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+                    <SavingsOutlinedIcon sx={{
+                        display: { xs: 'none', md: 'flex' },
+                        mr: 1,
+                        color: (theme) => theme.palette.text.secondary,
+                    }} />
                     <Typography
                         variant="h6"
                         noWrap
@@ -60,24 +66,31 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                             fontFamily: 'monospace',
                             fontWeight: 700,
                             letterSpacing: '.3rem',
-                            color: 'inherit',
+                            color: theme.palette.text.secondary,
                             textDecoration: 'none',
                         }}
                     >
                         TrackIt
                     </Typography>
 
-                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <Box sx={{
+                        flexGrow: 1,
+                        display: { xs: 'flex', md: 'none' },
+
+                    }}>
                         <IconButton
                             size="large"
                             aria-label="account of current user"
                             aria-controls="menu-appbar"
                             aria-haspopup="true"
                             onClick={handleOpenNavMenu}
-                            color="inherit"
+                            sx={{
+                                color: (theme) => theme.palette.text.secondary,
+                            }}
                         >
                             <MenuIcon />
                         </IconButton>
+
                         <Menu
                             id="menu-appbar"
                             anchorEl={anchorElNav}
@@ -96,7 +109,7 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                         >
                             {actions.map(({ text, fn }) => (
                                 <MenuItem key={text} onClick={() => fn(true)}>
-                                    <Typography sx={{ textAlign: 'center' }}>{text}</Typography>
+                                    <Typography sx={{ textAlign: 'center', color: theme.palette.text.secondary, }}>{text}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -105,7 +118,7 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {actions.map(({ text, fn }) => (
                             <MenuItem key={text} onClick={() => fn(true)}>
-                                <Typography sx={{ textAlign: 'center' }}>{text}</Typography>
+                                <Typography sx={{ textAlign: 'center', color: theme.palette.text.secondary }}>{text}</Typography>
                             </MenuItem>
                         ))}
                     </Box>

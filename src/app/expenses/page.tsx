@@ -33,7 +33,7 @@ const ExpensePage = () => {
                 flexDirection="column"
                 alignItems="center"
                 justifyContent="center"
-                sx={{ padding: '20px', spacing: 2 }}
+                sx={{ padding: '20px', spacing: 2, marginTop: '40px' }}
             >
 
                 {/* Modal para adicionar nova categoria */}
