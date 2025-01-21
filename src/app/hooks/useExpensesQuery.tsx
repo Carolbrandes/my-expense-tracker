@@ -20,16 +20,13 @@ const fetchExpenses = async (
         }, {} as Record<string, string>)
         : {};
 
-    console.log("🚀 ~ validFilters:", validFilters)
+
 
     const queryParams = new URLSearchParams({
         userId,
         ...validFilters,
     });
-    console.log("🚀 ~ queryParams:", queryParams)
 
-
-    console.log("URL Fetch:", `/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`)
 
     const response = await fetch(`/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`);
 

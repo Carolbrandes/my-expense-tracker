@@ -38,21 +38,39 @@ export const Resume = () => {
     return (
         <Box
             sx={{
+                width: { xs: '100%', md: '49%' },
                 display: "flex",
-                justifyContent: isMobile ? 'center' : 'flex-start',
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: { xs: 'center', md: 'flex-start' },
                 alignItems: "center",
+                gap: { xs: '0.75rem', md: 0 },
                 paddingY: '30px',
-                fontSize: isMobile ? '0.75rem' : '1rem'  // 12px para mobile, 16px para desktop
+                fontSize: { xs: '0.75rem', md: '1rem' }
             }}
         >
-            <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} />
-            {!isMobile && "Total Entradas:"} <span style={{ marginRight: !isMobile ? '10px' : 0 }}>Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}</span>
-            {!isMobile && "|"}
-            <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />
-            {!isMobile && "Total Saídas:"} <span style={{ marginRight: !isMobile ? '10px' : 0 }}>Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })}</span>
-            {!isMobile && "|"}
-            <PaidIcon color='primary' sx={{ marginLeft: '10px', marginRight: '5px' }} />
-            {!isMobile && "Saldo:"} Gs. {Number(balance).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+            <Box sx={{ width: { xs: '100%', md: 'auto' }, display: 'flex', alignItems: 'center' }}>
+                <ArrowCircleUpIcon color="success" sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                {!isMobile && "Total Entradas:"}
+                <span style={{ marginRight: !isMobile ? '10px' : 0 }}>
+                    Gs. {Number(totalIncome).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                </span>
+                {!isMobile && "|"}
+            </Box>
+
+            <Box sx={{ width: { xs: '100%', md: 'auto' }, display: 'flex', alignItems: 'center' }}>
+                <ArrowCircleDownIcon color="error" sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                {!isMobile && "Total Saídas:"}
+                <span style={{ marginRight: !isMobile ? '10px' : 0 }}>
+                    Gs. {Number(totalExpense).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                </span>
+                {!isMobile && "|"}
+            </Box>
+
+            <Box sx={{ width: { xs: '100%', md: 'auto' }, display: 'flex', alignItems: 'center' }}>
+                <PaidIcon color='primary' sx={{ marginLeft: '10px', marginRight: '5px' }} />
+                {!isMobile && "Saldo:"}
+                Gs. {Number(balance).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+            </Box>
         </Box>
     )
 }

@@ -1,4 +1,5 @@
-import { createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material';
+
 
 export const lightTheme = createTheme({
     palette: {
@@ -15,12 +16,29 @@ export const lightTheme = createTheme({
         },
         text: {
             primary: '#000000',
-            secondary: '#fff'
+            secondary: '#fff',
         },
-    }
+        custom: {
+            red: '#ff0000',  // Red for light theme
+        }
+    },
+    components: {
+        MuiInput: {
+            styleOverrides: {
+                root: {
+                    color: '#000', // Cor do texto no campo
+                },
+            },
+        },
+        MuiInputLabel: {
+            styleOverrides: {
+                root: {
+                    color: '#000', // Cor do rótulo
+                },
+            },
+        },
+    },
 });
-
-
 
 export const darkTheme = createTheme({
     palette: {
@@ -32,12 +50,14 @@ export const darkTheme = createTheme({
             main: '#545454',
         },
         background: {
-            default: '#726f6f',
-            paper: '#1d1d1d',
+            default: '#3a3838',
+            paper: '#3a3838',
         },
         text: {
             primary: '#ffffff',
-
         },
+        custom: {
+            red: '#f58d86',  // Custom red for dark theme
+        }
     },
 });

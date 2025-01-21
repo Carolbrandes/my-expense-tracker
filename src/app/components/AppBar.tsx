@@ -76,6 +76,7 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                     <Box sx={{
                         flexGrow: 1,
                         display: { xs: 'flex', md: 'none' },
+                        alignItems: "center"
 
                     }}>
                         <IconButton
@@ -90,6 +91,29 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                         >
                             <MenuIcon />
                         </IconButton>
+
+                        <SavingsOutlinedIcon sx={{
+                            display: { xs: 'flex', md: 'none' },
+                            mr: 1,
+                            color: (theme) => theme.palette.text.secondary,
+                        }} />
+                        <Typography
+                            variant="h6"
+                            noWrap
+                            component="a"
+                            href="#app-bar-with-responsive-menu"
+                            sx={{
+                                mr: 2,
+                                display: { xs: 'flex', md: 'none' },
+                                fontFamily: 'monospace',
+                                fontWeight: 700,
+                                letterSpacing: '.3rem',
+                                color: theme.palette.text.secondary,
+                                textDecoration: 'none',
+                            }}
+                        >
+                            TrackIt
+                        </Typography>
 
                         <Menu
                             id="menu-appbar"

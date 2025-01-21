@@ -3,7 +3,7 @@ import { useTransaction } from '@/app/hooks/useTransactions';
 import { TransactionType } from '@/app/types/interfaces';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { Button, FormControl, MenuItem, Select, TableCell, TableRow, TextField } from '@mui/material';
+import { Button, FormControl, MenuItem, Select, TableCell, TableRow, TextField, useTheme } from '@mui/material';
 import { Expense } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { useCategoriesQuery } from '../../../hooks/useCategoriesQuery';
@@ -23,6 +23,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     const { editingId, selectExpenseToEdit, formatDateFromISO, defineDeleteTarget, handleCancelModal } = useTransaction()
     const { categories } = useCategoriesQuery();
     const { expenses, updateExpense } = useExpensesQuery()
+    const theme = useTheme();
 
     const handleEdit = () => {
         const mapTypeToTransactionType = (type: string): TransactionType => {
@@ -55,7 +56,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
 
     useEffect(() => {
         if (editingId) {
-            const expenseToEdit = expenses?.find(exp => exp.id === editingId);
+            const expenseToEdit = expenses?.data?.find(exp => exp.id === editingId);
             if (expenseToEdit) {
                 setDescription(expenseToEdit.description);
                 setCategory(expenseToEdit.category);
@@ -66,7 +67,9 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
 
                 setDate(formattedDate);
 
-                setType(expenseToEdit.type);
+                const expenseToEditTypeConvert = expenseToEdit.type as TransactionType
+
+                setType(expenseToEditTypeConvert);
             }
         }
 
@@ -107,10 +110,9 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 )}
             </TableCell>
             <TableCell
-                style={{
-                    color: expense.type === TransactionType.Expense ? 'red' : 'green',
-                }}
-            >
+                style={{ color: expense.type === TransactionType.Expense ? theme?.palette?.custom?.red : 'green' }}>
+
+
                 {editingId === expense.id ? (
                     <TextField
                         type="number"
@@ -178,9 +180,25 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 )}
             </TableCell>
             <TableCell>
-                <Button aria-label="delete" color="error" onClick={() => handleDel()}>
-                    <DeleteIcon />
-                </Button>
+                {
+                    editingId === expense.id ?
+                        <Button onClick={() => selectExpenseToEdit(null)} sx={{
+                            color: theme?.palette?.custom?.red,
+                            cursor: "pointer"
+                        }}>Cancelar</Button>
+                        :
+                        <Button
+                            aria-label="delete"
+                            sx={{
+                                color: theme?.palette?.custom?.red,
+                                cursor: "pointer"
+                            }}
+                            onClick={() => handleDel()}
+                        >
+                            <DeleteIcon />
+                        </Button>
+                }
+
             </TableCell>
         </TableRow>
     )

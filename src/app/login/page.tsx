@@ -1,6 +1,6 @@
 "use client";
 
-import { Alert, Box, Button, TextField, Typography } from "@mui/material";
+import { Alert, Box, Button, TextField, Typography, useTheme } from "@mui/material";
 import { jwtDecode } from "jwt-decode";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ export default function LoginPage() {
     const [message, setMessage] = useState("");
     const { updateAuthenticated, updateUserId } = useAuth();
     const router = useRouter();
+    const theme = useTheme();
 
     const MessagesSeverity = {
         "Invalid code.": "error",
@@ -130,13 +131,24 @@ export default function LoginPage() {
                     <Typography variant="h5" fontWeight="bold" color="primary">
                         Login
                     </Typography>
+
                     <TextField
-                        fullWidth
                         type="email"
                         label="Email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        variant="outlined"
+                        fullWidth
+                        size="small"
+                        variant="standard"
+                        InputProps={{
+                            style: {
+                                borderBottom: `1px solid ${theme?.palette.primary.main}`, // Borda visível no estado inicial
+                                color: theme?.palette.primary.main
+                            },
+                        }}
+                        InputLabelProps={{
+                            style: { color: theme?.palette.primary.main }, // Garantir rótulo visível
+                        }}
                     />
                     <Button
                         fullWidth
@@ -144,6 +156,13 @@ export default function LoginPage() {
                         color="primary"
                         onClick={sendCode}
                         size="large"
+                        sx={{
+                            fontSize: {
+                                xs: '0.75rem',
+                                sm: '1rem',
+                            },
+                            color: theme?.palette?.text?.secondary
+                        }}
                     >
                         Solicitar código de verificação
                     </Button>
@@ -170,13 +189,25 @@ export default function LoginPage() {
                     <Typography variant="h5" fontWeight="bold" color="primary">
                         Inserir Código de Verificação
                     </Typography>
+
+
                     <TextField
-                        fullWidth
                         type="text"
                         label="Código de Verificação"
                         value={code}
                         onChange={(e) => setCode(e.target.value)}
-                        variant="outlined"
+                        fullWidth
+                        size="small"
+                        variant="standard"
+                        InputProps={{
+                            style: {
+                                borderBottom: `1px solid ${theme?.palette.primary.main}`, // Borda visível no estado inicial
+                                color: theme?.palette.primary.main
+                            },
+                        }}
+                        InputLabelProps={{
+                            style: { color: theme?.palette.primary.main }, // Garantir rótulo visível
+                        }}
                     />
                     <Button
                         fullWidth
