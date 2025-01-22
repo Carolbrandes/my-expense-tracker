@@ -22,10 +22,8 @@ export async function POST(req: Request) {
                     email, // Register the new user with the provided email
                 },
             });
-            console.log("🚀 ~ POST ~ verify-code ~ Created new user:", user);
         }
 
-        console.log("🚀 ~ POST ~ verify-code ~ user:", user);
 
         // Fetch the verification code from the database
         const verification = await prisma.verificationCode.findFirst({
@@ -39,7 +37,6 @@ export async function POST(req: Request) {
             } as any,
         });
 
-        console.log("🚀 ~ POST ~ verify-code ~ verification:", verification);
 
         if (verification) {
             // Mark the code as used or expired

@@ -22,7 +22,6 @@ export async function POST(req: Request) {
             create: { email },
         });
 
-        console.log("🚀 ~ POST ~ user:", user);
 
         const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
@@ -34,7 +33,6 @@ export async function POST(req: Request) {
             } as any
         });
 
-        console.log(`Code sent to ${email}: ${code}`);
 
         // Configure Nodemailer
         const transporter = nodemailer.createTransport({

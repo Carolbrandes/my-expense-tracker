@@ -24,15 +24,15 @@ export const TransactionsTableHeader = () => {
 
 
 
-    const theme = useTheme(); // Access the theme
+    const theme = useTheme();
 
     return (
         <TableHead>
             <TableRow>
                 <TableCell
                     style={{
-                        backgroundColor: theme.palette.secondary.main, // Secondary color from theme
-                        color: theme.palette.text.secondary,           // Font color from theme
+                        backgroundColor: theme.palette.secondary.main,
+                        color: theme.palette.text.secondary,
                         fontWeight: '700',
                         cursor: 'pointer',
                     }}

@@ -15,7 +15,7 @@ export const LogoutButton = () => {
 
     return (
         <Button title="Sair" sx={{
-            color: (theme) => theme.palette.text.secondary, // Use text.secondary here
+            color: (theme) => theme.palette.text.secondary,
         }} onClick={handleLogout}>
             <LogoutOutlinedIcon />
         </Button>

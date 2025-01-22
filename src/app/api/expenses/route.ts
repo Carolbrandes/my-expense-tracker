@@ -4,7 +4,6 @@ import { NextResponse } from 'next/server';
 // Add a new expense
 export async function POST(request: Request) {
     const body = await request.json();
-    console.log("🚀 ~ POST ~ body:", body)
     const { description, category, amount, date, type, userId } = body;
 
     if (!userId) {
@@ -27,7 +26,6 @@ export async function POST(request: Request) {
                 userId,
             },
         });
-        console.log("🚀 ~ POST ~ expense:", expense)
 
         return NextResponse.json(expense, { status: 201 });
     } catch (error) {
@@ -96,10 +94,6 @@ export async function GET(request: Request) {
             filters.date = { lte: new Date(endDate) };
         }
 
-        console.log("Filters:", filters);
-        console.log("Order by:", { [sortBy]: sortOrder });
-
-
 
         const [expenses, totalCount] = await Promise.all([
             prisma.expense.findMany({
@@ -113,7 +107,6 @@ export async function GET(request: Request) {
             prisma.expense.count({ where: filters }),
         ]);
 
-        console.log("🚀 ~ GET ~ expenses:", expenses)
 
         const totalPages = Math.ceil(totalCount / pageSize);
 

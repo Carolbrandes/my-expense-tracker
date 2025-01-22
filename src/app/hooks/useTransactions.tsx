@@ -37,10 +37,11 @@ interface TransactionContextProps {
     formatDateFromISO: (isoString) => string
 
     editingId: number | null
-    selectExpenseToEdit: (expenseSelectedId: number | null) => void
+    defineEditExpenseId: (expenseSelectedId: number | null) => void
+    updateExpenseEdit: (updatedExpense) => void
 
     deleteDialogOpen: boolean
-    handleCancelModal: (isOpen: boolean) => void
+    toggleCancelModal: (isOpen: boolean) => void
     deleteTarget: DeleteTargetProps | null
     defineDeleteTarget: (data: DeleteTargetProps) => void
 
@@ -90,7 +91,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { expenses } = useExpensesQuery(page, pageSize, filters);
+    const { expenses, updateExpense } = useExpensesQuery(page, pageSize, filters);
 
     const updateFilters = (filters: FilterProps) => setFilters((prev) => ({ ...prev, ...filters }))
 
@@ -122,8 +123,13 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         setFilteredExpenses(expenseFilterAndSort);
     };
 
-    const selectExpenseToEdit = (expenseSelectedId: number | null) =>
+    const defineEditExpenseId = (expenseSelectedId: number | null) =>
         setEditingId(expenseSelectedId);
+
+    const updateExpenseEdit = (updatedExpense) => {
+        updateExpense(updatedExpense);
+        defineEditExpenseId(null);
+    }
 
     const formatDateFromISO = (isoString: string) => {
         const regex = /^(\d{4})-(\d{2})-(\d{2})/;
@@ -137,7 +143,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         return isoString;
     };
 
-    const handleCancelModal = (isOpen: boolean) => setDeleteDialogOpen(isOpen);
+    const toggleCancelModal = (isOpen: boolean) => setDeleteDialogOpen(isOpen);
 
     const defineSortCriteria = (column: string) => {
         setSortCriteria((prev) => {
@@ -170,9 +176,10 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         isMobile,
         formatDateFromISO,
         editingId,
-        selectExpenseToEdit,
+        defineEditExpenseId,
+        updateExpenseEdit,
         deleteDialogOpen,
-        handleCancelModal,
+        toggleCancelModal,
         deleteTarget,
         defineDeleteTarget,
         sortCriteria,

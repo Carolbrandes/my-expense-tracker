@@ -1,4 +1,3 @@
-// import { useExpensesQuery } from '@/app/hooks/useExpensesQuery';
 import { useTransaction } from '@/app/hooks/useTransactions';
 import { Pagination } from '@mui/material';
 import { Box } from '@mui/system';
@@ -26,7 +25,7 @@ export const PaginationComponent = ({ page }: PaginationProps) => {
                 page={page}
                 onChange={handlePageChange}
                 color="secondary"
-                onClick={() => console.log("cliquei botao paginacao")}
+
             />
         </Box>
     );

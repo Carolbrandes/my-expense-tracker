@@ -19,21 +19,22 @@ export const lightTheme = createTheme({
             secondary: '#fff',
         },
         custom: {
-            red: '#ff0000',  // Red for light theme
+            red: '#ff0000',
+            green: '#049a04'
         }
     },
     components: {
         MuiInput: {
             styleOverrides: {
                 root: {
-                    color: '#000', // Cor do texto no campo
+                    color: '#000',
                 },
             },
         },
         MuiInputLabel: {
             styleOverrides: {
                 root: {
-                    color: '#000', // Cor do rótulo
+                    color: '#000',
                 },
             },
         },
@@ -57,7 +58,8 @@ export const darkTheme = createTheme({
             primary: '#ffffff',
         },
         custom: {
-            red: '#f58d86',  // Custom red for dark theme
+            red: '#f58d86',
+            green: '#a2c8a2'
         }
     },
 });

@@ -12,7 +12,7 @@ import {
     TextField
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import { useCategoriesQuery } from '../../../hooks/useCategoriesQuery'; // Ensure the correct import path
+import { useCategoriesQuery } from '../../../hooks/useCategoriesQuery';
 import { Expense, TransactionType } from '../../../types/interfaces';
 
 interface EditModalProps {
@@ -28,7 +28,7 @@ export const EditModal: React.FC<EditModalProps> = ({ open, onClose, onSave, exp
 
     useEffect(() => {
         if (expense) {
-            setFormValues(expense);  // Ensure the form is populated when modal opens
+            setFormValues(expense);
         }
     }, [expense]);
 
@@ -37,12 +37,12 @@ export const EditModal: React.FC<EditModalProps> = ({ open, onClose, onSave, exp
         if (formValues) {
             setFormValues({
                 ...formValues,
-                [name]: name === 'amount' ? parseFloat(value) : value,  // Convert amount to number if necessary
+                [name]: name === 'amount' ? parseFloat(value) : value,
             });
         }
     };
 
-    const handleSelectChange = (e: SelectChangeEvent) => { // Use SelectChangeEvent
+    const handleSelectChange = (e: SelectChangeEvent) => {
         const { name, value } = e.target;
         if (formValues && name) {
             setFormValues({
@@ -54,7 +54,7 @@ export const EditModal: React.FC<EditModalProps> = ({ open, onClose, onSave, exp
 
     const handleSave = () => {
         if (formValues) {
-            onSave(formValues);  // Save the updated values
+            onSave(formValues);
         }
     };
 
@@ -75,7 +75,7 @@ export const EditModal: React.FC<EditModalProps> = ({ open, onClose, onSave, exp
                         <FormControl fullWidth margin="normal">
                             <InputLabel id="category-label">Categoria</InputLabel>
                             <Select
-                                labelId="category-label" // Associate label with Select
+                                labelId="category-label"
                                 name="category"
                                 value={formValues.category}
                                 onChange={handleSelectChange}
@@ -110,7 +110,7 @@ export const EditModal: React.FC<EditModalProps> = ({ open, onClose, onSave, exp
                         <FormControl fullWidth margin="normal">
                             <InputLabel id="type-label">Tipo</InputLabel>
                             <Select
-                                labelId="type-label" // Associate label with Select
+                                labelId="type-label"
                                 name="type"
                                 value={formValues.type}
                                 onChange={handleSelectChange}

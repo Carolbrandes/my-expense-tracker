@@ -22,23 +22,23 @@ export default function LoginPage() {
         default: "info",
     };
 
-    // Utility function to validate the token
+
     const isTokenValid = (token) => {
         try {
             const decoded = jwtDecode(token);
-            return decoded.exp * 1000 > Date.now(); // Token expiration in milliseconds
+            return decoded.exp * 1000 > Date.now();
         } catch (error) {
             console.error("Invalid token:", error);
             return false;
         }
     };
 
-    // Check for token validity on page load
+
     useEffect(() => {
         const token = localStorage.getItem("auth_token");
         if (token && isTokenValid(token)) {
             updateAuthenticated(true);
-            updateUserId(jwtDecode(token).userId); // Update user ID from token
+            updateUserId(jwtDecode(token).userId);
             router.push("/");
         } else {
             localStorage.removeItem("auth_token");
@@ -142,12 +142,12 @@ export default function LoginPage() {
                         variant="standard"
                         InputProps={{
                             style: {
-                                borderBottom: `1px solid ${theme?.palette.primary.main}`, // Borda visível no estado inicial
+                                borderBottom: `1px solid ${theme?.palette.primary.main}`,
                                 color: theme?.palette.primary.main
                             },
                         }}
                         InputLabelProps={{
-                            style: { color: theme?.palette.primary.main }, // Garantir rótulo visível
+                            style: { color: theme?.palette.primary.main },
                         }}
                     />
                     <Button
@@ -201,12 +201,12 @@ export default function LoginPage() {
                         variant="standard"
                         InputProps={{
                             style: {
-                                borderBottom: `1px solid ${theme?.palette.primary.main}`, // Borda visível no estado inicial
+                                borderBottom: `1px solid ${theme?.palette.primary.main}`,
                                 color: theme?.palette.primary.main
                             },
                         }}
                         InputLabelProps={{
-                            style: { color: theme?.palette.primary.main }, // Garantir rótulo visível
+                            style: { color: theme?.palette.primary.main },
                         }}
                     />
                     <Button

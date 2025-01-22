@@ -1,9 +1,5 @@
-
-// import { Alert, Box, Button, FormControl, MenuItem, Paper, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
-import { useTransaction } from "../../hooks/useTransactions";
-// import { TransactionsTableHeader } from './TransactionsDesk/TransactionsTableHeader';
-// import { TransactionRow } from './TransactionsDesk/TransactionRow';
 import { Alert, Box } from "@mui/material";
+import { useTransaction } from "../../hooks/useTransactions";
 import { TransactionsDesk } from './TransactionsDesk';
 import { TransactionsMobile } from './TransactionsMobile';
 

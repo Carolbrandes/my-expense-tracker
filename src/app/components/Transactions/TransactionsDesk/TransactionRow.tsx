@@ -20,16 +20,15 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType | "">(TransactionType.Expense);
 
-    const { editingId, selectExpenseToEdit, formatDateFromISO, defineDeleteTarget, handleCancelModal } = useTransaction()
+    const { editingId, defineEditExpenseId, formatDateFromISO, defineDeleteTarget, toggleCancelModal, updateExpenseEdit } = useTransaction()
     const { categories } = useCategoriesQuery();
-    const { expenses, updateExpense } = useExpensesQuery()
+    const { expenses } = useExpensesQuery()
     const theme = useTheme();
 
     const handleEdit = () => {
         const mapTypeToTransactionType = (type: string): TransactionType => {
             return type === "expense" ? TransactionType.Expense : TransactionType.Income;
         };
-
 
         const expenseUpdate = {
             ...expense,
@@ -40,18 +39,13 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
             type: mapTypeToTransactionType(type as string),
         };
 
-
-
-        updateExpense(expenseUpdate);
-
-        selectExpenseToEdit(null);
+        updateExpenseEdit(expenseUpdate)
     };
-
 
 
     const handleDel = () => {
         defineDeleteTarget({ id: +expense.id, description: expense.description })
-        handleCancelModal(true);
+        toggleCancelModal(true);
     }
 
     useEffect(() => {
@@ -110,7 +104,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 )}
             </TableCell>
             <TableCell
-                style={{ color: expense.type === TransactionType.Expense ? theme?.palette?.custom?.red : 'green' }}>
+                style={{ color: expense.type === TransactionType.Expense ? theme?.palette?.custom?.red : theme?.palette?.custom?.green }}>
 
 
                 {editingId === expense.id ? (
@@ -174,7 +168,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                         Salvar
                     </Button>
                 ) : (
-                    <Button aria-label="edit" onClick={() => selectExpenseToEdit(expense.id)} color="primary">
+                    <Button aria-label="edit" onClick={() => defineEditExpenseId(expense.id)} color="primary">
                         <EditIcon />
                     </Button>
                 )}
@@ -182,10 +176,14 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
             <TableCell>
                 {
                     editingId === expense.id ?
-                        <Button onClick={() => selectExpenseToEdit(null)} sx={{
-                            color: theme?.palette?.custom?.red,
-                            cursor: "pointer"
-                        }}>Cancelar</Button>
+                        <Button
+                            onClick={() => defineEditExpenseId(null)}
+                            sx={{
+                                color: theme?.palette?.custom?.red,
+                                cursor: "pointer"
+                            }}>
+                            Cancelar
+                        </Button>
                         :
                         <Button
                             aria-label="delete"

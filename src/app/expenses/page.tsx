@@ -6,11 +6,12 @@ import {
 import { useState } from 'react';
 import ResponsiveAppBar from '../components/AppBar';
 import { Filters } from '../components/Filters';
-import { ModalDeleteTransaction } from '../components/ModalDeleteTransaction';
 import { ModalNewCategory } from '../components/ModalNewCategory';
 import { ModalNewTransaction } from '../components/ModalNewTransaction';
 import { Resume } from '../components/Resume';
+import { Toast } from '../components/Toast';
 import { Transactions } from '../components/Transactions';
+import { ModalDeleteTransaction } from '../components/Transactions/ModalDeleteTransaction';
 import { Skeleton } from '../components/Transactions/Skeleton';
 import { useExpensesQuery } from '../hooks/useExpensesQuery';
 
@@ -18,7 +19,10 @@ import { useExpensesQuery } from '../hooks/useExpensesQuery';
 const ExpensePage = () => {
     const [openModal, setOpenModal] = useState(false);
     const [openCategoryModal, setOpenCategoryModal] = useState(false);
+    const [toastMessage, setToastMessage] = useState("")
     const { isExpensesLoading } = useExpensesQuery()
+
+    const handleCloseToastMessage = () => setToastMessage("")
 
 
     return (
@@ -36,21 +40,16 @@ const ExpensePage = () => {
                 sx={{ padding: '20px', spacing: 2, marginTop: '40px' }}
             >
 
-                {/* Modal para adicionar nova categoria */}
                 <ModalNewCategory openCategoryModal={openCategoryModal} setOpenCategoryModal={setOpenCategoryModal} />
 
-
-                {/* Modal para adicionar novo registro */}
                 <ModalNewTransaction openModal={openModal} setOpenModal={setOpenModal} />
 
                 <Box>
                     <h2 >Relatório de Transações</h2>
                 </Box>
 
-                {/* filtros */}
                 <Filters />
 
-                {/* Total */}
                 <Resume />
 
                 {
@@ -62,8 +61,15 @@ const ExpensePage = () => {
                     )
                 }
 
-                {/* Modal de confirmação de deleção */}
+
                 <ModalDeleteTransaction />
+
+                <Toast
+                    open={!!toastMessage}
+                    toastMessage={toastMessage}
+                    handleCloseToastMessage={handleCloseToastMessage}
+                />
+
             </Box>
         </>
     );

@@ -37,7 +37,7 @@ export const CurrencyInput = React.forwardRef<HTMLInputElement, CurrencyInputPro
             onChange({
                 target: {
                     name,
-                    value: formattedValue.replace(/[^0-9.]/g, ''), // pass only the numeric value to the parent
+                    value: formattedValue.replace(/[^0-9.]/g, ''),
                 },
             });
         };

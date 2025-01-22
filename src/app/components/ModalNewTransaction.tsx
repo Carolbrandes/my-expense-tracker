@@ -127,7 +127,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
                     <FormControl fullWidth margin="normal">
                         <CurrencyInput
                             onChange={(event: { target: { value: string, name: string } }) => {
-                                setAmount(event.target.value); // Update with the numeric value
+                                setAmount(event.target.value);
                             }}
                             name='amount'
                             value={amount}

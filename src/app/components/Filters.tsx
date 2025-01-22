@@ -22,7 +22,7 @@ export const Filters = () => {
     const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
     const [filterDescription, setFilterDescription] = useState('');
     const [filterType, setFilterType] = useState<TransactionType | ''>('');
-    const [open, setOpen] = useState(false); // State to handle modal open/close
+    const [open, setOpen] = useState(false);
 
     const { isMobile, updateFilters } = useTransaction();
     const { categories } = useCategoriesQuery();

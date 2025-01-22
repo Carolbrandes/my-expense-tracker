@@ -42,7 +42,6 @@ const fetchExpenses = async (
     };
 };
 
-
 const addExpense = async (newExpense: Expense, userId: string): Promise<Expense> => {
     const response = await fetch('/api/expenses', {
         method: 'POST',
