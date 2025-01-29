@@ -1,8 +1,8 @@
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
-import { TableCell, TableHead, TableRow, useTheme } from '@mui/material';
+
+import { TableHead, TableRow } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useTransaction } from '../../../hooks/useTransactions';
+import { TransactionsTableCellHeader } from './TransactionsTableCellHeader';
 
 export const TransactionsTableHeader = () => {
     const [sortBy, setSortBy] = useState("date")
@@ -10,19 +10,18 @@ export const TransactionsTableHeader = () => {
 
     const { onApplyFilters, appliedFilters } = useTransaction()
 
-    const getArrow = (column: string) => {
-        const criteria = sortBy === column;
-        if (!criteria) return null;
 
-        return sortOrder === "asc" ? (
-            <ArrowUpwardIcon sx={{ color: 'white' }} />
-        ) : (
-            <ArrowDownwardIcon sx={{ color: 'white' }} />
-        );
-    };
+    const tableHeaders = [
+        { label: "Descrição", value: "description" },
+        { label: "Categoria", value: "category" },
+        { label: "Valor", value: "amount" },
+        { label: "Data", value: "date" },
+        { label: "Tipo", value: "type", sortable: false },
+        { label: "Editar", value: "edit", sortable: false },
+        { label: "Remover", value: "remove", sortable: false }
+    ];
 
     const handleChangeSortOrder = () => setSortOrder(sortOrder === "asc" ? "desc" : "asc")
-
 
 
     useEffect(() => {
@@ -35,88 +34,22 @@ export const TransactionsTableHeader = () => {
     }, [sortBy, sortOrder])
 
 
-
-    const theme = useTheme();
-
     return (
         <TableHead>
             <TableRow>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        gap: '5px'
-                    }}
-                    onClick={() => setSortBy('description')}
-                >
-                    Descrição <button style={{ background: 'none', border: 'none', outline: 'none' }} onClick={handleChangeSortOrder}>{getArrow('description')}</button>
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                    }}
-                    onClick={() => setSortBy('category')}
-                >
-                    Categoria <button style={{ background: 'none', border: 'none', outline: 'none' }} onClick={handleChangeSortOrder}>{getArrow('category')}</button>
+                {tableHeaders.map(({ label, value, sortable = true }) => (
+                    <TransactionsTableCellHeader
+                        key={value}
+                        label={label}
+                        value={value}
+                        sortOrder={sortOrder}
+                        sortBy={sortBy}
+                        clickFn={() => setSortBy(value)}
+                        handleChangeSortOrder={handleChangeSortOrder}
+                        sortable={sortable}
+                    />
+                ))}
 
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                    }}
-                    onClick={() => setSortBy('amount')}
-                >
-                    Valor <button style={{ background: 'none', border: 'none', outline: 'none' }} onClick={handleChangeSortOrder}>{getArrow('amount')}</button>
-
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                        cursor: 'pointer',
-                    }}
-                    onClick={() => setSortBy('date')}
-                >
-                    Data <button style={{ background: 'none', border: 'none', outline: 'none' }} onClick={handleChangeSortOrder}>{getArrow('date')}</button>
-
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                    }}
-                >
-                    Tipo
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                    }}
-                >
-                    Editar
-                </TableCell>
-                <TableCell
-                    style={{
-                        backgroundColor: theme.palette.secondary.main,
-                        color: theme.palette.text.secondary,
-                        fontWeight: '700',
-                    }}
-                >
-                    Remover
-                </TableCell>
             </TableRow>
         </TableHead>
     );
