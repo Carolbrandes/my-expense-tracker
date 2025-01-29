@@ -75,6 +75,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         sortBy: "date",
         sortOrder: "desc"
     });
+    console.log("🚀 ~ TransactionProvider ~ appliedFilters:", appliedFilters)
 
 
     const theme = useTheme();

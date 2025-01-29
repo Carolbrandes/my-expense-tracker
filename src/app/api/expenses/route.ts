@@ -42,6 +42,7 @@ export async function GET(request: Request) {
         const description = searchParams.get('description');
         const category = searchParams.get('category');
         const type = searchParams.get('type');
+        const amount = searchParams.get('amount');
         const sortBy = searchParams.get('sortBy') || 'date';
         const sortOrder = searchParams.get('sortOrder') || 'desc';
         const startDate = searchParams.get('startDate');
@@ -53,7 +54,7 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'Valid User ID is required.' }, { status: 400 });
         }
 
-        const allowedSortBy = ['date', 'description', 'category'];
+        const allowedSortBy = ['date', 'description', 'category', 'amount'];
         const allowedSortOrder = ['asc', 'desc'];
 
         if (!allowedSortBy.includes(sortBy)) {
@@ -81,6 +82,10 @@ export async function GET(request: Request) {
 
         if (type) {
             filters.type = { equals: type };
+        }
+
+        if (amount) {
+            filters.amount = { equals: amount };
         }
 
         if (startDate && endDate) {
