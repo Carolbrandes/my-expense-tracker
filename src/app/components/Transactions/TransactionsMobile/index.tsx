@@ -9,8 +9,8 @@ import { EditModal } from './EditModal';
 
 export const TransactionsMobile = () => {
     const {
+        expenses,
         formatDateFromISO,
-        filteredExpenses,
         editingId,
         defineEditExpenseId,
         updateExpenseEdit,
@@ -19,6 +19,7 @@ export const TransactionsMobile = () => {
         toggleCancelModal
     } = useTransaction();
 
+
     const theme = useTheme();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,10 +27,10 @@ export const TransactionsMobile = () => {
 
     useEffect(() => {
         if (editingId !== null) {
-            const expenseToEdit = filteredExpenses.find(expense => expense.id === editingId);
+            const expenseToEdit = expenses?.data?.find(expense => expense.id === editingId);
             setIsModalOpen(!!expenseToEdit);
         }
-    }, [editingId, filteredExpenses]);
+    }, [editingId, expenses]);
 
     const handleDel = (expenseToDelete) => {
         if (expenseToDelete) {
@@ -40,7 +41,7 @@ export const TransactionsMobile = () => {
 
     return (
         <div style={{ width: '95%', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {filteredExpenses?.map((expense) => (
+            {expenses?.data?.map((expense) => (
                 <Paper key={expense.id} style={{ width: '100%', padding: '1rem', position: 'relative', border: '1px solid #ddd' }}>
                     <div style={{ position: 'absolute', top: '0.5rem', right: '0.5rem', display: 'flex', gap: '0.25rem' }}>
                         <Button sx={{ minWidth: '5px' }} aria-label="edit" onClick={() => defineEditExpenseId(+expense.id)} color="primary">
@@ -77,7 +78,7 @@ export const TransactionsMobile = () => {
                     open={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
                     onSave={(updatedExpense) => updateExpenseEdit(updatedExpense)}
-                    expense={filteredExpenses.find(expense => expense.id === editingId) || null}
+                    expense={expenses?.data.find(expense => expense.id === editingId) || null}
                 />
             )}
 

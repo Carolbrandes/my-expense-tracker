@@ -49,11 +49,9 @@ export async function GET(request: Request) {
         const page = parseInt(searchParams.get('page') || '1', 10);
         const pageSize = parseInt(searchParams.get('pageSize') || '10', 10);
 
-
         if (!userId || isNaN(Number(userId))) {
             return NextResponse.json({ message: 'Valid User ID is required.' }, { status: 400 });
         }
-
 
         const allowedSortBy = ['date', 'description', 'category'];
         const allowedSortOrder = ['asc', 'desc'];
@@ -70,30 +68,35 @@ export async function GET(request: Request) {
             return NextResponse.json({ message: 'Page and pageSize must be greater than 0.' }, { status: 400 });
         }
 
-
+        // Apply filters
         const filters: any = { userId: Number(userId) };
 
-
         if (description) {
-            filters.description = { contains: String(description) };
+            filters.description = { contains: description }; // Case-sensitive search
         }
+
         if (category) {
-            filters.category = { contains: String(category) };
+            filters.category = { contains: category };
         }
+
         if (type) {
-            filters.type = { equals: String(type) };
+            filters.type = { equals: type };
         }
+
         if (startDate && endDate) {
             filters.date = {
                 gte: new Date(startDate),
                 lte: new Date(endDate),
             };
         } else if (startDate) {
-            filters.date = { gte: new Date(startDate) };
+            filters.date = {
+                gte: new Date(startDate),
+            };
         } else if (endDate) {
-            filters.date = { lte: new Date(endDate) };
+            filters.date = {
+                lte: new Date(endDate),
+            };
         }
-
 
         const [expenses, totalCount] = await Promise.all([
             prisma.expense.findMany({
@@ -104,9 +107,10 @@ export async function GET(request: Request) {
                 skip: (page - 1) * pageSize,
                 take: pageSize,
             }),
-            prisma.expense.count({ where: filters }),
+            prisma.expense.count({
+                where: filters,
+            }),
         ]);
-
 
         const totalPages = Math.ceil(totalCount / pageSize);
 

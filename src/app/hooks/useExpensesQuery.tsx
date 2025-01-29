@@ -11,24 +11,27 @@ const fetchExpenses = async (
     filters?: FilterProps
 ): Promise<ExpenseResponse> => {
 
+
     const validFilters = filters
         ? Object.entries(filters).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
-                acc[key] = value.toString();
+                acc[key] = String(value); // Converte tudo para string
             }
             return acc;
         }, {} as Record<string, string>)
         : {};
 
 
-
     const queryParams = new URLSearchParams({
-        userId,
+        userId: String(userId),
+        page: String(page),
+        pageSize: String(pageSize),
         ...validFilters,
     });
 
 
-    const response = await fetch(`/api/expenses?${queryParams.toString()}&page=${page}&pageSize=${pageSize}`);
+    const response = await fetch(`/api/expenses?${queryParams.toString()}`);
+
 
     if (!response.ok) {
         throw new Error('Failed to fetch expenses');
@@ -36,9 +39,10 @@ const fetchExpenses = async (
 
     const data = await response.json();
 
+
     return {
         data: data.data,
-        meta: data.meta
+        meta: data.meta,
     };
 };
 
@@ -89,30 +93,28 @@ const deleteExpense = async (deleteExpense: ExpenseDelete) => {
     return id;
 };
 
-
-
 export const useExpensesQuery = (
     page = 1,
     pageSize = 5,
-    filters?: FilterProps) => {
+    filters?: FilterProps,
+    enabled: boolean = false
+) => {
     const { userId } = useAuth();
-
     const queryClient = useQueryClient();
-
 
     const {
         data: expenses,
         isLoading: isExpensesLoading,
         error: expensesError,
+        refetch, // Pegue o refetch aqui
     } = useQuery({
         queryKey: ['expenses', userId, page, pageSize, filters],
         queryFn: () => {
             if (!userId) return Promise.resolve({ data: [], meta: null });
             return fetchExpenses(userId, page, pageSize, filters);
         },
-        enabled: !!userId,
+        enabled,
     });
-
 
     const {
         mutate: createExpense,
@@ -126,11 +128,9 @@ export const useExpensesQuery = (
             return addExpense(newExpense, userId);
         },
         onSuccess: () => {
-
             queryClient.invalidateQueries({ queryKey: ['expenses', userId] });
         },
     });
-
 
     const {
         mutate: updateExpense,
@@ -140,10 +140,8 @@ export const useExpensesQuery = (
         mutationFn: editExpense,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['expenses', userId] });
-
         },
     });
-
 
     const {
         mutate: removeExpense,
@@ -157,7 +155,6 @@ export const useExpensesQuery = (
     });
 
     const isCreating = status === 'pending';
-
 
     if (!userId) {
         return {
@@ -175,11 +172,10 @@ export const useExpensesQuery = (
             updateError: null,
             removeExpense: () => { },
             deleteStatus: false,
-            deleteError: null
+            deleteError: null,
+            refetch: () => Promise.resolve(), // Adicione um fallback para refetch
         };
     }
-
-
 
     return {
         expenses,
@@ -193,7 +189,7 @@ export const useExpensesQuery = (
         updateError,
         removeExpense,
         deleteStatus,
-        deleteError
+        deleteError,
+        refetch, // Retorne o refetch aqui
     };
-
 };

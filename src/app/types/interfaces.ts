@@ -36,11 +36,11 @@ export interface SortCriteria {
 }
 
 export interface FilterProps {
-    description: string,
-    category: string,
-    type: TransactionType | string,
-    startDate: string,
-    endDate: string,
+    description?: string,
+    category?: string,
+    type?: TransactionType | string,
+    startDate?: string,
+    endDate?: string,
     sortBy?: string;
     sortOrder?: string;
 }

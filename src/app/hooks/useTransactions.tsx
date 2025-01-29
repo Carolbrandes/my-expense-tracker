@@ -9,7 +9,6 @@ import {
     useEffect,
     useState
 } from 'react';
-import { Expense, FilterProps, SortCriteria } from '../types/interfaces';
 import { useExpensesQuery } from './useExpensesQuery';
 
 
@@ -26,8 +25,7 @@ interface DeleteTargetProps {
 
 
 interface TransactionContextProps {
-    filteredExpenses: Expense[] | []
-    updateFilteredExpenses: (newValue: Expense[]) => void
+    expenses: any
 
     loading: boolean
     updateLoading: (isLoading: boolean) => void
@@ -45,17 +43,13 @@ interface TransactionContextProps {
     deleteTarget: DeleteTargetProps | null
     defineDeleteTarget: (data: DeleteTargetProps) => void
 
-    sortCriteria: SortCriteria
-    defineSortCriteria: (column: string) => void
-
     page: number
     updatePage: (page: number) => void
     pageSize: number
     totalPages: number
 
-    filters: FilterProps,
-    updateFilters: (filters: FilterProps) => void
-
+    appliedFilters: any
+    onApplyFilters: (filters: any) => void
 
 }
 
@@ -65,35 +59,31 @@ const TransactionContext = createContext<TransactionContextProps>(
 
 
 export function TransactionProvider({ children }: TransactionProviderProps) {
-    const [filteredExpenses, setFilteredExpenses] = useState<Expense[] | []>([]);
     const [loading, setLoading] = useState(true);
     const [editingId, setEditingId] = useState<number | null>(null);
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [deleteTarget, setDeleteTarget] = useState<DeleteTargetProps | null>(null);
-    const [sortCriteria, setSortCriteria] = useState<SortCriteria>({
-        column: 'description',
-        direction: 'asc',
-    });
-    const [filters, setFilters] = useState<FilterProps>({
+    const [page, setPage] = useState<number>(1);
+    const [pageSize] = useState(5);
+    const [totalPages, setTotalPages] = useState(0)
+    const [appliedFilters, setAppliedFilters] = useState({
         description: "",
         category: "",
         type: "",
         startDate: "",
         endDate: "",
-        sortBy: "",
+        sortBy: "date",
         sortOrder: "desc"
-    } as FilterProps)
-
-    const [page, setPage] = useState<number>(1);
-    const [pageSize] = useState(5);
-    const [totalPages, setTotalPages] = useState(0)
+    });
 
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-    const { expenses, updateExpense } = useExpensesQuery(page, pageSize, filters);
+    const { expenses, updateExpense } = useExpensesQuery(page, pageSize, appliedFilters, true);
 
-    const updateFilters = (filters: FilterProps) => setFilters((prev) => ({ ...prev, ...filters }))
+    const onApplyFilters = (filters: any) => {
+        setAppliedFilters(filters); // Atualiza os filtros aplicados
+    };
 
     const updatePage = (page: number) => setPage(page)
 
@@ -102,26 +92,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
     const defineDeleteTarget = (dataDeleteTarget: DeleteTargetProps) =>
         setDeleteTarget(dataDeleteTarget);
 
-    const updateFilteredExpenses = (newExpense: Expense[]) => {
-        const expenseFilterAndSort = newExpense.sort((a, b) => {
-            const { column, direction } = sortCriteria;
-            let comparison = 0;
 
-            if (column === 'description') {
-                comparison = a.description.localeCompare(b.description);
-            } else if (column === 'category') {
-                comparison = a.category.localeCompare(b.category);
-            } else if (column === 'amount') {
-                comparison = a.amount - b.amount;
-            } else if (column === 'date') {
-                comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
-            }
-
-            return direction === 'asc' ? comparison : -comparison;
-        });
-
-        setFilteredExpenses(expenseFilterAndSort);
-    };
 
     const defineEditExpenseId = (expenseSelectedId: number | null) =>
         setEditingId(expenseSelectedId);
@@ -145,32 +116,19 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
     const toggleCancelModal = (isOpen: boolean) => setDeleteDialogOpen(isOpen);
 
-    const defineSortCriteria = (column: string) => {
-        setSortCriteria((prev) => {
-            if (prev.column === column) {
-                return { ...prev, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
-            }
-
-            return { column, direction: 'asc' };
-        });
-    };
-
 
     useEffect(() => {
-        if (expenses?.data?.length) {
-            updateFilteredExpenses(expenses.data);
-        }
-
         if (expenses?.meta?.totalPages) {
-            setTotalPages(expenses.meta.totalPages);
+            setTotalPages(expenses.meta.totalPages);  // Atualiza o número de páginas
         }
-    }, [expenses, filters, page]);
+    }, [expenses, page]);
 
 
 
     const contextValue: TransactionContextProps = {
-        filteredExpenses,
-        updateFilteredExpenses,
+        expenses,
+        appliedFilters,
+        onApplyFilters,
         loading,
         updateLoading,
         isMobile,
@@ -182,14 +140,10 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         toggleCancelModal,
         deleteTarget,
         defineDeleteTarget,
-        sortCriteria,
-        defineSortCriteria,
         page,
         updatePage,
         pageSize,
         totalPages,
-        filters,
-        updateFilters
     };
 
     return (

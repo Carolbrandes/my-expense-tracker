@@ -8,48 +8,63 @@ import {
     MenuItem,
     Modal,
     Select,
-    SelectChangeEvent,
     TextField
 } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useCategoriesQuery } from "../hooks/useCategoriesQuery";
 import { useTransaction } from "../hooks/useTransactions";
-import { TransactionType } from "../types/interfaces";
+import { FilterProps, TransactionType } from "../types/interfaces";
 
 export const Filters = () => {
-    const [filterCategory, setFilterCategory] = useState('');
-    const [filterDate, setFilterDate] = useState({ startDate: '', endDate: '' });
-    const [filterDescription, setFilterDescription] = useState('');
-    const [filterType, setFilterType] = useState<TransactionType | ''>('');
+    const [localFilters, setLocalFilters] = useState<FilterProps>({
+        description: "",
+        category: "",
+        type: "",
+        startDate: "",
+        endDate: "",
+        sortBy: "",
+        sortOrder: "desc"
+    } as FilterProps)
+
     const [open, setOpen] = useState(false);
 
-    const { isMobile, updateFilters } = useTransaction();
+    const { isMobile, onApplyFilters } = useTransaction();
     const { categories } = useCategoriesQuery();
+
+
     const theme = useTheme();
 
-    useEffect(() => {
-        updateFilters({
-            category: filterCategory,
-            type: filterType || "",
-            description: filterDescription,
-            startDate: filterDate.startDate,
-            endDate: filterDate.endDate
-        });
-    }, [filterCategory, filterDate, filterType, filterDescription]);
 
     const clearFilters = () => {
-        setFilterCategory('');
-        setFilterDate({ startDate: '', endDate: '' });
-        setFilterType("");
-        setFilterDescription('');
+        const resetFilters = {
+            description: "",
+            category: "",
+            type: "",
+            startDate: "",
+            endDate: "",
+            sortBy: "",
+            sortOrder: "desc"
+        }
+        setLocalFilters(resetFilters)
+        onApplyFilters(resetFilters)
     };
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
 
+
+    const handleApplyFilters = () => {
+        onApplyFilters(localFilters) // apos o clique, o state applyFilters sera atualizado e ai no useTransactions sera feita a chamada do useQuery
+    };
+
+
     const safeCategories = Array.isArray(categories) ? categories : [];
+
+    const isAnyFilterSet = Object.entries(localFilters).some(
+        ([key, value]) => key !== "sortOrder" && value !== ""
+    );
 
     const filterContent = (
         <Box
@@ -66,8 +81,8 @@ export const Filters = () => {
             {/* Inputs */}
             <TextField
                 label="Descrição"
-                value={filterDescription}
-                onChange={(e) => setFilterDescription(e.target.value)}
+                value={localFilters.description}
+                onChange={(e) => setLocalFilters(prev => ({ ...prev, description: e.target.value }))}
                 fullWidth={isMobile}
                 size="small"
                 variant="standard"
@@ -78,8 +93,8 @@ export const Filters = () => {
             <TextField
                 label="Data de Inicio"
                 type="date"
-                value={filterDate.startDate}
-                onChange={(e) => setFilterDate((prev) => ({ ...prev, startDate: e.target.value }))}
+                value={localFilters.startDate}
+                onChange={(e) => setLocalFilters(prev => ({ ...prev, startDate: e.target.value }))}
                 fullWidth={isMobile}
                 InputLabelProps={{ shrink: true }}
                 size="small"
@@ -91,8 +106,8 @@ export const Filters = () => {
             <TextField
                 label="Data de Fim"
                 type="date"
-                value={filterDate.endDate}
-                onChange={(e) => setFilterDate((prev) => ({ ...prev, endDate: e.target.value }))}
+                value={localFilters.endDate}
+                onChange={(e) => setLocalFilters(prev => ({ ...prev, endDate: e.target.value }))}
                 fullWidth={isMobile}
                 InputLabelProps={{ shrink: true }}
                 size="small"
@@ -114,8 +129,8 @@ export const Filters = () => {
                 <InputLabel id="category-label">Categoria</InputLabel>
                 <Select
                     labelId="category-label"
-                    value={filterCategory}
-                    onChange={(e) => setFilterCategory(e.target.value)}
+                    value={localFilters.category}
+                    onChange={(e) => setLocalFilters(prev => ({ ...prev, category: e.target.value }))}
                 >
                     <MenuItem value="">Todas</MenuItem>
                     {safeCategories.map(({ id, name }) => (
@@ -139,8 +154,8 @@ export const Filters = () => {
                 <InputLabel id="type-label">Tipo</InputLabel>
                 <Select
                     labelId="type-label"
-                    value={filterType}
-                    onChange={(e: SelectChangeEvent<TransactionType>) => setFilterType(e.target.value as "" | TransactionType)}
+                    value={localFilters.type}
+                    onChange={(e) => setLocalFilters(prev => ({ ...prev, type: e.target.value as TransactionType }))}
                 >
                     <MenuItem value="">Todos</MenuItem>
                     <MenuItem value={TransactionType.Income}>Entrada</MenuItem>
@@ -150,18 +165,32 @@ export const Filters = () => {
 
             {/* Botão de Limpar Filtros */}
             {!isMobile && (
-                <Button
-                    variant="outlined"
-                    onClick={clearFilters}
-                    sx={{
-                        minWidth: '160px',
-                        color: (theme) => theme.palette.text.primary,
-                        borderColor: (theme) => theme.palette.text.primary,
-                        flex: '0 0 auto',
-                    }}
-                >
-                    Limpar Filtros
-                </Button>
+                <>
+                    <Button
+                        onClick={handleApplyFilters}
+                        variant="contained"
+                        color='primary'
+                        sx={{
+                            color: (theme) => theme.palette.text.secondary
+                        }}
+
+                    >
+                        Filtrar
+                    </Button>
+
+                    <Button
+                        variant="outlined"
+                        onClick={clearFilters}
+                        sx={{
+                            // minWidth: '160px',
+                            color: (theme) => theme.palette.text.primary,
+                            borderColor: (theme) => theme.palette.text.primary,
+                            flex: '0 0 auto',
+                        }}
+                    >
+                        Limpar Filtros
+                    </Button>
+                </>
             )}
         </Box>
     );
@@ -170,7 +199,7 @@ export const Filters = () => {
         <>
             {isMobile ? (
                 <>
-                    {(filterCategory || filterDate.startDate || filterDate.endDate || filterType || filterDescription) && (
+                    {isAnyFilterSet && (
                         <IconButton
                             color="secondary"
                             onClick={clearFilters}
@@ -247,15 +276,10 @@ export const Filters = () => {
                             {filterContent}
 
                             {/* Aplicar Button */}
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleClose}
-                                fullWidth
-                                sx={{ mt: 3 }}
-                            >
-                                Aplicar
-                            </Button>
+                            <Button onClick={() => {
+                                handleApplyFilters()
+                                handleClose()
+                            }}>Filtrar</Button>
                         </Box>
                     </Modal>
                 </>

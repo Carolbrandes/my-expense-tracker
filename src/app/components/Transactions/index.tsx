@@ -6,14 +6,12 @@ import { TransactionsMobile } from './TransactionsMobile';
 
 export const Transactions = () => {
 
-
-    const { isMobile, filteredExpenses } = useTransaction()
-
+    const { expenses, isMobile } = useTransaction()
 
 
     return (
         <>
-            {filteredExpenses?.length === 0 ? (
+            {expenses?.data.length === 0 ? (
                 <Box style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
                     <Alert
                         icon={false}

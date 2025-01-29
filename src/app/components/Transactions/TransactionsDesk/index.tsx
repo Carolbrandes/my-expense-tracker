@@ -7,10 +7,10 @@ import { TransactionsTableHeader } from './TransactionsTableHeader';
 
 export const TransactionsDesk = () => {
 
-    const { filteredExpenses, page } = useTransaction()
+    const { expenses, page } = useTransaction()
 
 
-    if (!filteredExpenses && isNaN(page) && !page) {
+    if (!expenses?.data && isNaN(page) && !page) {
         return
     }
 
@@ -21,7 +21,7 @@ export const TransactionsDesk = () => {
                 <Table>
                     <TransactionsTableHeader />
                     <TableBody>
-                        {filteredExpenses?.map((expense) => (
+                        {expenses?.data.map((expense) => (
                             <TransactionRow key={expense.id} expense={expense} />
                         ))}
                     </TableBody>

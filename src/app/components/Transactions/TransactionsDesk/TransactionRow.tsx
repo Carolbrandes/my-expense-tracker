@@ -1,4 +1,3 @@
-import { useExpensesQuery } from '@/app/hooks/useExpensesQuery';
 import { useTransaction } from '@/app/hooks/useTransactions';
 import { TransactionType } from '@/app/types/interfaces';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -20,12 +19,12 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType | "">(TransactionType.Expense);
 
-    const { editingId, defineEditExpenseId, formatDateFromISO, defineDeleteTarget, toggleCancelModal, updateExpenseEdit } = useTransaction()
+    const { expenses, editingId, defineEditExpenseId, formatDateFromISO, defineDeleteTarget, toggleCancelModal, updateExpenseEdit } = useTransaction()
     const { categories } = useCategoriesQuery();
-    const { expenses } = useExpensesQuery()
     const theme = useTheme();
 
     const handleEdit = () => {
+
         const mapTypeToTransactionType = (type: string): TransactionType => {
             return type === "expense" ? TransactionType.Expense : TransactionType.Income;
         };
@@ -49,24 +48,17 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     }
 
     useEffect(() => {
-        if (editingId) {
-            const expenseToEdit = expenses?.data?.find(exp => exp.id === editingId);
+
+        if (editingId && expenses?.data?.length) {
+            const expenseToEdit = expenses.data.find(exp => exp.id === editingId);
             if (expenseToEdit) {
-                setDescription(expenseToEdit.description);
-                setCategory(expenseToEdit.category);
-                setAmount(expenseToEdit.amount.toString());
-
-                // Adjust to date format YYYY-MM-DD
-                const formattedDate = new Date(expenseToEdit.date).toISOString().split('T')[0];
-
-                setDate(formattedDate);
-
-                const expenseToEditTypeConvert = expenseToEdit.type as TransactionType
-
-                setType(expenseToEditTypeConvert);
+                setDescription(expenseToEdit.description || '');
+                setCategory(expenseToEdit.category || '');
+                setAmount(expenseToEdit.amount?.toString() || '');
+                setDate(new Date(expenseToEdit.date).toISOString().split('T')[0]);
+                setType(expenseToEdit.type as TransactionType);
             }
         }
-
     }, [editingId, expenses]);
 
     return (
@@ -74,7 +66,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
             <TableCell>
                 {editingId === expense.id ? (
                     <TextField
-                        value={description}
+                        value={description || ""}
                         onChange={(e) => setDescription(e.target.value)}
                         fullWidth
                         size="small"
@@ -110,7 +102,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 {editingId === expense.id ? (
                     <TextField
                         type="number"
-                        value={amount}
+                        value={amount || ''}
                         onChange={(e) => setAmount(e.target.value)}
                         fullWidth
                         size="small"

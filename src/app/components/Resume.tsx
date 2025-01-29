@@ -11,16 +11,17 @@ export const Resume = () => {
     const [totalExpense, setTotalExpense] = useState(0)
     const [balance, setBalance] = useState(0) //saldo
 
-    const { isMobile, filteredExpenses } = useTransaction()
+    const { isMobile, expenses } = useTransaction()
+
 
     const calculateTotals = (transactions: Expense[]) => {
         const totalIncome = transactions
-            .filter(transaction => transaction.type === TransactionType.Income)
-            .reduce((acc, transaction) => acc + transaction.amount, 0);
+            ?.filter(transaction => transaction.type === TransactionType.Income)
+            ?.reduce((acc, transaction) => acc + transaction.amount, 0);
 
         const totalExpense = transactions
-            .filter(transaction => transaction.type === TransactionType.Expense)
-            .reduce((acc, transaction) => acc + transaction.amount, 0);
+            ?.filter(transaction => transaction.type === TransactionType.Expense)
+            ?.reduce((acc, transaction) => acc + transaction.amount, 0);
 
         const balance = totalIncome - totalExpense;
 
@@ -29,11 +30,13 @@ export const Resume = () => {
 
 
     useEffect(() => {
-        const { totalIncome, totalExpense, balance } = calculateTotals(filteredExpenses);
-        setTotalIncome(totalIncome)
-        setTotalExpense(totalExpense)
-        setBalance(balance)
-    }, [filteredExpenses])
+        if (expenses?.data) {
+            const { totalIncome, totalExpense, balance } = calculateTotals(expenses?.data as Expense[]);
+            setTotalIncome(totalIncome)
+            setTotalExpense(totalExpense)
+            setBalance(balance)
+        }
+    }, [expenses])
 
     return (
         <Box
