@@ -25,13 +25,13 @@ export async function POST(req: Request) {
 
         const expirationTime = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
-        await prisma.verificationCode.create({
-            data: {
-                code,
-                expiresAt: expirationTime,
-                user: { connect: { id: user.id } },
-            } as any
-        });
+        const data: Prisma.VerificationCodeCreateInput = {
+            code,
+            expiresAt: expirationTime,
+            user: { connect: { id: user.id } },
+        };
+
+        await prisma.verificationCode.create({ data });
 
 
         // Configure Nodemailer

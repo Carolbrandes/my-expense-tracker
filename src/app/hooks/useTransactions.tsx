@@ -9,6 +9,7 @@ import {
     useEffect,
     useState
 } from 'react';
+import { ExpenseResponse, FilterProps } from '../types/interfaces';
 import { useExpensesQuery } from './useExpensesQuery';
 
 
@@ -25,7 +26,7 @@ interface DeleteTargetProps {
 
 
 interface TransactionContextProps {
-    expenses: any
+    expenses: ExpenseResponse | undefined
 
     loading: boolean
     updateLoading: (isLoading: boolean) => void
@@ -48,8 +49,8 @@ interface TransactionContextProps {
     pageSize: number
     totalPages: number
 
-    appliedFilters: any
-    onApplyFilters: (filters: any) => void
+    appliedFilters: FilterProps
+    onApplyFilters: (filters: FilterProps) => void
 
 }
 
@@ -82,7 +83,8 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const { expenses, updateExpense } = useExpensesQuery(page, pageSize, appliedFilters, true);
 
-    const onApplyFilters = (filters: any) => {
+
+    const onApplyFilters = (filters: FilterProps) => {
         setAppliedFilters(filters); // Atualiza os filtros aplicados
     };
 
@@ -92,8 +94,6 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
     const defineDeleteTarget = (dataDeleteTarget: DeleteTargetProps) =>
         setDeleteTarget(dataDeleteTarget);
-
-
 
     const defineEditExpenseId = (expenseSelectedId: number | null) =>
         setEditingId(expenseSelectedId);

@@ -34,6 +34,18 @@ export async function POST(request: Request) {
     }
 }
 
+interface IFilters {
+    userId: number;
+    description?: { contains: string };
+    category?: { contains: string };
+    type?: { equals: string };
+    amount?: { equals: number };
+    date?: {
+        gte?: Date;
+        lte?: Date;
+    };
+}
+
 // Get all expenses for a user
 export async function GET(request: Request) {
     try {
@@ -70,7 +82,7 @@ export async function GET(request: Request) {
         }
 
         // Apply filters
-        const filters: any = { userId: Number(userId) };
+        const filters: IFilters = { userId: Number(userId) };
 
         if (description) {
             filters.description = { contains: description }; // Case-sensitive search
@@ -85,7 +97,7 @@ export async function GET(request: Request) {
         }
 
         if (amount) {
-            filters.amount = { equals: amount };
+            filters.amount = { equals: +amount };
         }
 
         if (startDate && endDate) {

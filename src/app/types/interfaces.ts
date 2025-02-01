@@ -30,18 +30,14 @@ export interface Category {
     name: string
 }
 
-export interface SortCriteria {
-    column: string;
-    direction: "asc" | "desc"
-}
 
 export interface FilterProps {
-    description?: string,
-    category?: string,
-    type?: TransactionType | string,
-    startDate?: string,
-    endDate?: string,
-    sortBy?: string;
-    sortOrder?: string;
+    description: string,
+    category: string,
+    type: TransactionType | string,
+    startDate: string,
+    endDate: string,
+    sortBy: string;
+    sortOrder: string;
 }
 

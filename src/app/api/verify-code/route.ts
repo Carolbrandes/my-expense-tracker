@@ -34,7 +34,7 @@ export async function POST(req: Request) {
                 expiresAt: {
                     gte: new Date(), // Ensure the code is not expired
                 },
-            } as any,
+            }
         });
 
 
