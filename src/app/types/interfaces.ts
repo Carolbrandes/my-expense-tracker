@@ -41,3 +41,9 @@ export interface FilterProps {
     sortOrder: string;
 }
 
+export interface UserProps {
+    id: number
+    email: string
+    currency: string
+}
+

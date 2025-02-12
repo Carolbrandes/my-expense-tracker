@@ -15,7 +15,7 @@ const fetchExpenses = async (
     const validFilters = filters
         ? Object.entries(filters).reduce((acc, [key, value]) => {
             if (value !== undefined && value !== null && value !== '') {
-                acc[key] = String(value); // Converte tudo para string
+                acc[key] = String(value);
             }
             return acc;
         }, {} as Record<string, string>)
@@ -106,7 +106,7 @@ export const useExpensesQuery = (
         data: expenses,
         isLoading: isExpensesLoading,
         error: expensesError,
-        refetch, // Pegue o refetch aqui
+        refetch,
     } = useQuery({
         queryKey: ['expenses', userId, page, pageSize, filters],
         queryFn: () => {
@@ -173,7 +173,7 @@ export const useExpensesQuery = (
             removeExpense: () => { },
             deleteStatus: false,
             deleteError: null,
-            refetch: () => Promise.resolve(), // Adicione um fallback para refetch
+            refetch: () => Promise.resolve(),
         };
     }
 
@@ -190,6 +190,6 @@ export const useExpensesQuery = (
         removeExpense,
         deleteStatus,
         deleteError,
-        refetch, // Retorne o refetch aqui
+        refetch,
     };
 };

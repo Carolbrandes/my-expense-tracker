@@ -182,7 +182,6 @@ export const Filters = () => {
                         variant="outlined"
                         onClick={clearFilters}
                         sx={{
-                            // minWidth: '160px',
                             color: (theme) => theme.palette.text.primary,
                             borderColor: (theme) => theme.palette.text.primary,
                             flex: '0 0 auto',

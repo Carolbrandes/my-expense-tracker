@@ -1,5 +1,6 @@
 import MenuIcon from '@mui/icons-material/Menu';
 import SavingsOutlinedIcon from '@mui/icons-material/SavingsOutlined';
+import { FormControl, InputLabel, Select, SelectChangeEvent } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -9,7 +10,11 @@ import MenuItem from '@mui/material/MenuItem';
 import { useTheme } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
+import { useQuery } from '@tanstack/react-query';
 import * as React from 'react';
+import { fetchCurrencies } from '../../lib/fetchCurrencies';
+import { useTransaction } from '../hooks/useTransactions';
+import { useUserQuery } from '../hooks/useUserQuery';
 import { LogoutButton } from './LogoutButton';
 import ThemeToggleButton from './ThemeToggleButton';
 
@@ -19,12 +24,21 @@ interface AppBarProps {
 }
 
 
-
-
 function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction }: AppBarProps) {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 
+    const { data: currencies = [], isLoading: isLoadingCurrencies, error: errorCurrencies } = useQuery({
+        queryKey: ['currencies'],
+        queryFn: fetchCurrencies,
+        staleTime: Infinity,
+    });
+
     const theme = useTheme();
+
+    const { isMobile } = useTransaction()
+
+    const { user, updateUser } = useUserQuery()
+    console.log("🚀 ~ ResponsiveAppBar ~ user:", user)
 
     const actions = [
         {
@@ -36,6 +50,11 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
             fn: handleOpenModalTransaction
         }
     ];
+
+    const handleCurrencyChange = (event: SelectChangeEvent<string>) => {
+        const currency = event.target.value as string;
+        updateUser({ ...user, currency })
+    };
 
     const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorElNav(event.currentTarget);
@@ -147,6 +166,33 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                         ))}
                     </Box>
                     <Box sx={{ flexGrow: 0 }}>
+
+                        <FormControl
+                            fullWidth={isMobile}
+                            size="small"
+                            variant="standard"
+                            sx={{
+                                flex: isMobile ? '1 1 100%' : '1 1 auto',
+                                minWidth: isMobile ? '100%' : '200px',
+                            }}
+                        >
+                            <InputLabel id="currency-label">Moeda</InputLabel>
+                            <Select
+                                labelId="currency-label"
+                                value={user.currency}
+                                defaultValue={user.currency}
+                                onChange={handleCurrencyChange}
+                            >
+
+                                {currencies?.map((currency) => (
+                                    <MenuItem key={currency} value={currency}>
+                                        {currency}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+
+
                         <ThemeToggleButton />
 
                         <LogoutButton />

@@ -85,7 +85,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
 
     const onApplyFilters = (filters: FilterProps) => {
-        setAppliedFilters(filters); // Atualiza os filtros aplicados
+        setAppliedFilters(filters);
     };
 
     const updatePage = (page: number) => setPage(page)
@@ -120,7 +120,7 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
 
     useEffect(() => {
         if (expenses?.meta?.totalPages) {
-            setTotalPages(expenses.meta.totalPages);  // Atualiza o número de páginas
+            setTotalPages(expenses.meta.totalPages);
         }
     }, [expenses, page]);
 

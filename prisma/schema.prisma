@@ -14,6 +14,7 @@ model User {
   verificationCodes VerificationCode[]
   expenses    Expense[]
   categories  Category[]
+  currency    String           @default("BRL")
 }
 
 model VerificationCode {

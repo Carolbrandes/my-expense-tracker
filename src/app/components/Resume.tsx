@@ -9,7 +9,7 @@ import { Expense, TransactionType } from "../types/interfaces";
 export const Resume = () => {
     const [totalIncome, setTotalIncome] = useState(0)
     const [totalExpense, setTotalExpense] = useState(0)
-    const [balance, setBalance] = useState(0) //saldo
+    const [balance, setBalance] = useState(0)
 
     const { isMobile, expenses } = useTransaction()
 
