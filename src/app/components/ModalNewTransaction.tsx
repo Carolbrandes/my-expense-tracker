@@ -28,7 +28,7 @@ export const ModalNewTransaction = ({ openModal, setOpenModal }: ModalNewTransac
     const [date, setDate] = useState('');
     const [type, setType] = useState<TransactionType>(TransactionType.Expense);
 
-    const { createExpense, createError } = useExpensesQuery()
+    const { createExpense } = useExpensesQuery()
     const { userId } = useAuth()
     const {
         categories,

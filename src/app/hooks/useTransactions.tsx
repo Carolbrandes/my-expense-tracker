@@ -76,8 +76,6 @@ export function TransactionProvider({ children }: TransactionProviderProps) {
         sortBy: "date",
         sortOrder: "desc"
     });
-    console.log("🚀 ~ TransactionProvider ~ appliedFilters:", appliedFilters)
-
 
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));

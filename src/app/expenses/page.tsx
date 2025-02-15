@@ -4,8 +4,8 @@ import {
     Box
 } from '@mui/material';
 import { useState } from 'react';
-import ResponsiveAppBar from '../components/AppBar';
 import { Filters } from '../components/Filters';
+import { Header } from '../components/Header';
 import { ModalNewCategory } from '../components/ModalNewCategory';
 import { ModalNewTransaction } from '../components/ModalNewTransaction';
 import { Resume } from '../components/Resume';
@@ -27,7 +27,7 @@ const ExpensePage = () => {
 
     return (
         <>
-            <ResponsiveAppBar
+            <Header
                 handleOpenModalCategory={setOpenCategoryModal}
                 handleOpenModalTransaction={setOpenModal}
             />

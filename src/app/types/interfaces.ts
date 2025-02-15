@@ -45,5 +45,7 @@ export interface UserProps {
     id: number
     email: string
     currency: string
+    categories: Category[]
+    expenses: Expense[]
 }
 

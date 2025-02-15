@@ -33,7 +33,6 @@ export const ModalNewCategory = ({
     } = useCategoriesQuery();
 
 
-
     const handleCategorySubmit = async () => {
         if (!newCategory.trim()) return;
 

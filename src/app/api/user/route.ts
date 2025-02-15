@@ -25,6 +25,8 @@ export async function GET(req: Request) {
                 email: true,
                 currency: true,
                 createdAt: true,
+                categories: true,
+                expenses: true,
             },
         });
 
@@ -32,7 +34,10 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
 
-        return NextResponse.json(user);
+        const respUserJson = NextResponse.json(user);
+        console.log("🚀 ~ GET ~ respUserJson:", respUserJson)
+
+        return respUserJson
     } catch (error) {
         console.error("🚀 ~ GET /api/user error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });

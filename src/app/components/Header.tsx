@@ -1,6 +1,7 @@
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import MenuIcon from '@mui/icons-material/Menu';
 import SavingsOutlinedIcon from '@mui/icons-material/SavingsOutlined';
-import { FormControl, InputLabel, Select, SelectChangeEvent } from '@mui/material';
+import { FormControl, Select, SelectChangeEvent, Skeleton } from '@mui/material';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
@@ -18,13 +19,14 @@ import { useUserQuery } from '../hooks/useUserQuery';
 import { LogoutButton } from './LogoutButton';
 import ThemeToggleButton from './ThemeToggleButton';
 
-interface AppBarProps {
+
+interface HeaderProps {
     handleOpenModalTransaction: (value: boolean) => void
     handleOpenModalCategory: (value: boolean) => void
 }
 
 
-function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction }: AppBarProps) {
+export function Header({ handleOpenModalCategory, handleOpenModalTransaction }: HeaderProps) {
     const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
 
     const { data: currencies = [], isLoading: isLoadingCurrencies, error: errorCurrencies } = useQuery({
@@ -32,13 +34,14 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
         queryFn: fetchCurrencies,
         staleTime: Infinity,
     });
+    console.log("🚀 ~ Header ~ errorCurrencies:", errorCurrencies)
 
     const theme = useTheme();
 
     const { isMobile } = useTransaction()
 
     const { user, updateUser } = useUserQuery()
-    console.log("🚀 ~ ResponsiveAppBar ~ user:", user)
+
 
     const actions = [
         {
@@ -165,33 +168,51 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
                             </MenuItem>
                         ))}
                     </Box>
-                    <Box sx={{ flexGrow: 0 }}>
+                    <Box sx={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
 
                         <FormControl
                             fullWidth={isMobile}
                             size="small"
                             variant="standard"
                             sx={{
-                                flex: isMobile ? '1 1 100%' : '1 1 auto',
-                                minWidth: isMobile ? '100%' : '200px',
+                                flex: isMobile ? "1 1 100%" : "1 1 auto",
+                                minWidth: isMobile ? "100%" : "200px",
+                                "& .MuiInput-underline:before": {
+                                    borderBottomColor: (theme) => theme.palette.text.secondary,
+                                },
                             }}
                         >
-                            <InputLabel id="currency-label">Moeda</InputLabel>
-                            <Select
-                                labelId="currency-label"
-                                value={user.currency}
-                                defaultValue={user.currency}
-                                onChange={handleCurrencyChange}
-                            >
-
-                                {currencies?.map((currency) => (
-                                    <MenuItem key={currency} value={currency}>
-                                        {currency}
-                                    </MenuItem>
-                                ))}
-                            </Select>
+                            {isLoadingCurrencies ? (
+                                <Skeleton variant="text" width="100%" height={40} />
+                            ) : (
+                                <Select
+                                    value={user.currency}
+                                    defaultValue={user.currency}
+                                    onChange={handleCurrencyChange}
+                                    sx={{
+                                        color: (theme) => theme.palette.text.secondary,
+                                        display: "flex",
+                                        alignItems: "center"
+                                    }}
+                                    renderValue={(selected) => (
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                            <AttachMoneyIcon titleAccess="Moeda" sx={{ color: (theme) => theme.palette.text.secondary }} />
+                                            {selected}
+                                        </div>
+                                    )}
+                                >
+                                    {currencies?.map((currency) => (
+                                        <MenuItem
+                                            key={currency}
+                                            value={currency}
+                                            sx={{ color: (theme) => theme.palette.text.secondary }}
+                                        >
+                                            {currency}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            )}
                         </FormControl>
-
 
                         <ThemeToggleButton />
 
@@ -202,4 +223,4 @@ function ResponsiveAppBar({ handleOpenModalCategory, handleOpenModalTransaction 
         </AppBar>
     );
 }
-export default ResponsiveAppBar;
+

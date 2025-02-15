@@ -2,15 +2,20 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { UserProps } from '../types/interfaces';
 import { useAuth } from './useAuthContext';
 
-const fetchUser = async (userId: string): Promise<{ id: number; email: string; currency: string; }> => {
+
+
+const fetchUser = async (userId: string): Promise<UserProps> => {
     const response = await fetch(`/api/user?userId=${userId}`);
     if (!response.ok) {
         throw new Error('Failed to fetch user data');
     }
-    return response.json();
+    const respJson = await response.json()
+    console.log("🚀 ~ fetchUser ~ respJson:", respJson)
+
+    return respJson;
 };
 
-const updateUser = async (user: UserProps): Promise<{ id: number; email: string; currency: string; }> => {
+const updateUser = async (user: UserProps): Promise<UserProps> => {
     const response = await fetch('/api/user', {
         method: 'POST',
         headers: {
@@ -23,6 +28,7 @@ const updateUser = async (user: UserProps): Promise<{ id: number; email: string;
         throw new Error('Failed to update user currency');
     }
     const data = await response.json();
+
     return data;
 };
 
@@ -32,7 +38,7 @@ export const useUserQuery = () => {
     const queryClient = useQueryClient();
 
     const {
-        data: user = { id: 0, email: '', currency: 'Dólar Americano' },
+        data: user = { id: 0, email: '', currency: 'Dólar Americano', categories: [], expenses: [] },
         isLoading: isUserLoading,
         error: userError,
     } = useQuery({

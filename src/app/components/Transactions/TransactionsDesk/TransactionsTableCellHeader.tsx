@@ -19,8 +19,7 @@ export const TransactionsTableCellHeader = ({ sortOrder, sortBy, clickFn, handle
 
     const getArrow = () => {
         const criteria = value == sortBy;
-        console.log("🚀 ~ getArrow ~ sortBy:", sortBy)
-        console.log("🚀 ~ getArrow ~ criteria:", criteria)
+
         if (!criteria) return null;
 
         return sortOrder === "asc" ? (
