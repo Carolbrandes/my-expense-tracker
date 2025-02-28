@@ -44,7 +44,10 @@ export interface FilterProps {
 export interface UserProps {
     id: number
     email: string
-    currency: string
+    currency: {
+        acronym: string
+        name: string
+    }
     categories: Category[]
     expenses: Expense[]
 }

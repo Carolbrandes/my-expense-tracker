@@ -1,4 +1,5 @@
 import { useTransaction } from '@/app/hooks/useTransactions';
+import { useUserQuery } from '@/app/hooks/useUserQuery';
 import { TransactionType } from '@/app/types/interfaces';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,6 +7,7 @@ import { Button, FormControl, MenuItem, Select, TableCell, TableRow, TextField, 
 import { Expense } from '@prisma/client';
 import { useEffect, useState } from 'react';
 import { useCategoriesQuery } from '../../../hooks/useCategoriesQuery';
+
 
 interface TransactionProps {
     expense: Expense
@@ -22,6 +24,7 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
     const { expenses, editingId, defineEditExpenseId, formatDateFromISO, defineDeleteTarget, toggleCancelModal, updateExpenseEdit } = useTransaction()
     const { categories } = useCategoriesQuery();
     const theme = useTheme();
+    const { user } = useUserQuery()
 
     const handleEdit = () => {
 
@@ -46,6 +49,20 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
         defineDeleteTarget({ id: +expense.id, description: expense.description })
         toggleCancelModal(true);
     }
+
+    const formatCurrency = (value: number, currency: string) => {
+        if (!currency) {
+            console.error('Currency code is missing');
+            return value.toFixed(2);
+        }
+
+        return new Intl.NumberFormat(undefined, {
+            style: "currency",
+            currency,
+            minimumFractionDigits: 2,
+        }).format(value);
+    };
+
 
     useEffect(() => {
 
@@ -110,7 +127,10 @@ export const TransactionRow = ({ expense }: TransactionProps) => {
                 ) : (
                     <>
                         {expense.type === TransactionType.Expense ? '-' : '+'}
-                        Gs. ${Number(expense.amount).toLocaleString('es-PY', { minimumFractionDigits: 0 })}
+                        {formatCurrency(
+                            Number(expense.amount),
+                            user?.currency?.acronym || 'USD'
+                        )}
                     </>
                 )}
             </TableCell>

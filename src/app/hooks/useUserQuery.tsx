@@ -38,7 +38,7 @@ export const useUserQuery = () => {
     const queryClient = useQueryClient();
 
     const {
-        data: user = { id: 0, email: '', currency: 'Dólar Americano', categories: [], expenses: [] },
+        data: user = { id: 0, email: '', currency: { name: 'Dólar Americano', acronym: 'USD' }, categories: [], expenses: [] },
         isLoading: isUserLoading,
         error: userError,
     } = useQuery({

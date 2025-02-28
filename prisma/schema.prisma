@@ -14,9 +14,16 @@ model User {
   verificationCodes VerificationCode[]
   expenses    Expense[]
   categories  Category[]
-  currency    String           @default("BRL")
+  currency    Currency?        @relation(fields: [currencyId], references: [id])
+  currencyId  Int?             // Make this nullable initially
 }
 
+model Currency {
+  id       Int      @id @default(autoincrement())
+  name     String
+  acronym  String
+  users    User[]   // This defines the reverse relation
+}
 model VerificationCode {
   id        Int      @id @default(autoincrement())
   expiresAt DateTime 

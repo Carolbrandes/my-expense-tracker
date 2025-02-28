@@ -1,4 +1,4 @@
-import { Clear, Close, FilterList } from '@mui/icons-material';
+import { Clear, Close, Delete, FilterList } from '@mui/icons-material';
 import {
     Box,
     Button,
@@ -26,7 +26,6 @@ export const Filters = () => {
         sortBy: "",
         sortOrder: "desc"
     } as FilterProps)
-
     const [open, setOpen] = useState(false);
 
     const { isMobile, onApplyFilters } = useTransaction();
@@ -34,7 +33,6 @@ export const Filters = () => {
 
 
     const theme = useTheme();
-
 
     const clearFilters = () => {
         const resetFilters = {
@@ -45,20 +43,17 @@ export const Filters = () => {
             endDate: "",
             sortBy: "",
             sortOrder: "desc"
-        }
-        setLocalFilters(resetFilters)
-        onApplyFilters(resetFilters)
+        };
+        setLocalFilters(resetFilters);
+        onApplyFilters(resetFilters);
     };
 
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
 
-
-
     const handleApplyFilters = () => {
-        onApplyFilters(localFilters) // apos o clique, o state applyFilters sera atualizado e ai no useTransactions sera feita a chamada do useQuery
+        onApplyFilters(localFilters);
     };
-
 
     const safeCategories = Array.isArray(categories) ? categories : [];
 
@@ -86,9 +81,6 @@ export const Filters = () => {
                 fullWidth={isMobile}
                 size="small"
                 variant="standard"
-                sx={{
-                    flex: isMobile ? '1 1 100%' : '1 1 auto',
-                }}
             />
             <TextField
                 label="Data de Inicio"
@@ -99,9 +91,6 @@ export const Filters = () => {
                 InputLabelProps={{ shrink: true }}
                 size="small"
                 variant="standard"
-                sx={{
-                    flex: isMobile ? '1 1 100%' : '1 1 auto',
-                }}
             />
             <TextField
                 label="Data de Fim"
@@ -112,20 +101,9 @@ export const Filters = () => {
                 InputLabelProps={{ shrink: true }}
                 size="small"
                 variant="standard"
-                sx={{
-                    flex: isMobile ? '1 1 100%' : '1 1 auto',
-                }}
             />
 
-            <FormControl
-                fullWidth={isMobile}
-                size="small"
-                variant="standard"
-                sx={{
-                    flex: isMobile ? '1 1 100%' : '1 1 auto',
-                    minWidth: isMobile ? '100%' : '200px',
-                }}
-            >
+            <FormControl sx={{ minWidth: 180 }} size="small" variant="standard">
                 <InputLabel id="category-label">Categoria</InputLabel>
                 <Select
                     labelId="category-label"
@@ -134,23 +112,12 @@ export const Filters = () => {
                 >
                     <MenuItem value="">Todas</MenuItem>
                     {safeCategories.map(({ id, name }) => (
-                        <MenuItem key={id} value={name}>
-                            {name}
-                        </MenuItem>
+                        <MenuItem key={id} value={name}>{name}</MenuItem>
                     ))}
                 </Select>
             </FormControl>
 
-            <FormControl
-                fullWidth={isMobile}
-                size="small"
-                variant="standard"
-                sx={{
-                    flex: isMobile ? '1 1 100%' : '1 1 auto',
-                    minWidth: isMobile ? '100%' : '150px',
-                    maxWidth: '200px',
-                }}
-            >
+            <FormControl sx={{ minWidth: 150 }} size="small" variant="standard">
                 <InputLabel id="type-label">Tipo</InputLabel>
                 <Select
                     labelId="type-label"
@@ -163,34 +130,27 @@ export const Filters = () => {
                 </Select>
             </FormControl>
 
-            {/* Botão de Limpar Filtros */}
-            {!isMobile && (
-                <>
-                    <Button
-                        onClick={handleApplyFilters}
-                        variant="contained"
-                        color='primary'
-                        sx={{
-                            color: (theme) => theme.palette.text.secondary
-                        }}
 
-                    >
-                        Filtrar
-                    </Button>
+            {/* Buttons */}
+            <Box sx={{ display: "flex", gap: 2, justifyContent: "center", width: "100%" }}>
+                <Button
+                    onClick={handleApplyFilters}
+                    variant="contained"
+                    sx={{
+                        color: (theme) => theme.palette.text.secondary
+                    }}
+                >
+                    Filtrar
+                </Button>
 
-                    <Button
-                        variant="outlined"
-                        onClick={clearFilters}
-                        sx={{
-                            color: (theme) => theme.palette.text.primary,
-                            borderColor: (theme) => theme.palette.text.primary,
-                            flex: '0 0 auto',
-                        }}
-                    >
-                        Limpar Filtros
-                    </Button>
-                </>
-            )}
+                <Button
+                    variant="outlined"
+                    onClick={clearFilters}
+                    startIcon={<Delete />}
+                >
+                    Limpar
+                </Button>
+            </Box>
         </Box>
     );
 
@@ -204,14 +164,11 @@ export const Filters = () => {
                             onClick={clearFilters}
                             sx={{
                                 position: 'fixed',
-                                zIndex: 1,
                                 bottom: 16,
                                 right: 16,
                                 backgroundColor: theme.palette.secondary.main,
                                 color: theme.palette.common.white,
-                                '&:hover': {
-                                    backgroundColor: theme.palette.secondary.dark
-                                },
+                                '&:hover': { backgroundColor: theme.palette.secondary.dark },
                                 borderRadius: '50%',
                             }}
                         >
@@ -219,32 +176,23 @@ export const Filters = () => {
                         </IconButton>
                     )}
 
-                    {/* Filter Button (Fixed on mobile) */}
                     <IconButton
                         color="primary"
                         onClick={handleOpen}
                         sx={{
                             position: 'fixed',
-                            zIndex: 1,
                             bottom: 62,
                             right: 16,
                             backgroundColor: theme.palette.primary.main,
                             color: theme.palette.common.white,
-                            '&:hover': {
-                                backgroundColor: theme.palette.primary.dark
-                            },
+                            '&:hover': { backgroundColor: theme.palette.primary.dark },
                             borderRadius: '50%',
                         }}
                     >
                         <FilterList />
                     </IconButton>
 
-                    <Modal
-                        open={open}
-                        onClose={handleClose}
-                        aria-labelledby="filter-modal"
-                        aria-describedby="filter-modal-description"
-                    >
+                    <Modal open={open} onClose={handleClose}>
                         <Box
                             sx={{
                                 position: 'absolute',
@@ -259,50 +207,29 @@ export const Filters = () => {
                                 borderRadius: 2,
                             }}
                         >
-                            {/* Close Button at Top-Right */}
-                            <IconButton
-                                onClick={handleClose}
-                                sx={{
-                                    position: 'absolute',
-                                    top: 8,
-                                    right: 8,
-                                    color: theme.palette.text.primary
-                                }}
-                            >
+                            <IconButton onClick={handleClose} sx={{ position: 'absolute', top: 8, right: 8 }}>
                                 <Close />
                             </IconButton>
 
                             {filterContent}
 
-                            {/* Aplicar Button */}
-                            <Button onClick={() => {
-                                handleApplyFilters()
-                                handleClose()
-                            }}>Filtrar</Button>
+                            <Button
+                                onClick={() => {
+                                    handleApplyFilters();
+                                    handleClose();
+                                }}
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                            >
+                                Filtrar
+                            </Button>
                         </Box>
                     </Modal>
                 </>
             ) : (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        width: '100%',
-                        height: '100%',
-                    }}
-                >
-                    <Box
-                        sx={{
-                            width: '80%',
-                            display: 'flex',
-                            flexWrap: 'wrap',
-                            gap: 2,
-                            paddingY: '30px',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                        }}
-                    >
+                <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <Box sx={{ width: '80%', display: 'flex', flexWrap: 'wrap', gap: 2 }}>
                         {filterContent}
                     </Box>
                 </Box>
